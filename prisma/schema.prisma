@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String?
+  avatar        String?
+  googleId      String?  @unique @map("google_id")
+  password      String?
+  preferences   Json?    @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  routes        Route[]
+  interactions  UserPlaceInteraction[]
+  chatHistory   ChatMessage[]
+  budgets       BudgetTracking[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  icon        String
+  color       String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  places      Place[]
+
+  @@map("categories")
+}
+
+model Place {
+  id            String   @id @default(uuid())
+  name          String
+  slug          String   @unique
+  categoryId    String   @map("category_id")
+  description   String
+  address       String?
+  lat           Float
+  lng           Float
+  photos        String[] @default([])
+  audioGuideUrl String?  @map("audio_guide_url")
+  priceRange    String?  @map("price_range")
+  rating        Float?   @default(0)
+  openingHours  Json?    @map("opening_hours")
+  tags          String[] @default([])
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  category      Category @relation(fields: [categoryId], references: [id])
+  interactions  UserPlaceInteraction[]
+  insights      Insight[]
+
+  @@map("places")
+}
+
+model Route {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  name          String
+  description   String?
+  params        Json     // time, mood, budget, etc.
+  places        Json     // ordered array of place details
+  totalDuration Int      @map("total_duration") // minutes
+  totalCost     Float    @map("total_cost")
+  distance      Float?   // km
+  sharedToken   String?  @unique @map("shared_token")
+  rating        Float?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatHistory   ChatMessage[]
+  budget        BudgetTracking[]
+
+  @@map("routes")
+}
+
+model UserPlaceInteraction {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  placeId    String    @map("place_id")
+  visited    Boolean   @default(false)
+  liked      Boolean   @default(false)
+  wishlist   Boolean   @default(false)
+  visitedAt  DateTime? @map("visited_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place      Place     @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, placeId])
+  @@map("user_place_interactions")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  routeId   String?  @map("route_id")
+  message   String
+  role      String   // 'user' or 'assistant'
+  context   Json?    // additional context
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  route     Route?   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+model BudgetTracking {
+  id             String   @id @default(uuid())
+  routeId        String   @map("route_id")
+  userId         String   @map("user_id")
+  plannedBudget  Float    @map("planned_budget")
+  spent          Float    @default(0)
+  expenses       Json     @default("[]") // array of expense objects
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  route          Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([routeId, userId])
+  @@map("budget_tracking")
+}
+
+model Insight {
+  id            String   @id @default(uuid())
+  placeId       String?  @map("place_id")
+  title         String
+  description   String
+  category      String   // 'tip', 'important', 'secret'
+  helpfulCount  Int      @default(0) @map("helpful_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  place         Place?   @relation(fields: [placeId], references: [id], onDelete: SetNull)
+
+  @@map("insights")
+}
+
+model WeatherCache {
+  id           String   @id @default(uuid())
+  locationHash String   @unique @map("location_hash")
+  data         Json
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("weather_cache")
+}
