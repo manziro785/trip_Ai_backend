@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { AuthRequest } from "../types";
+import { AuthRequest, VisitPlaceRequest } from "../types";
 import { RouteService } from "../services/route.service";
 
 const routeService = new RouteService();
@@ -29,13 +29,34 @@ export class RouteController {
       const userId = req.user!.id;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
+      const status = req.query.status as any;
 
-      const result = await routeService.getUserRoutes(userId, page, limit);
+      const result = await routeService.getUserRoutes(
+        userId,
+        page,
+        limit,
+        status,
+      );
 
       res.json({
         success: true,
         data: result.routes,
         pagination: result.pagination,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /api/routes/active
+  async getActiveRoute(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.id;
+      const route = await routeService.getActiveRoute(userId);
+
+      res.json({
+        success: true,
+        data: route,
       });
     } catch (error) {
       next(error);
@@ -89,6 +110,68 @@ export class RouteController {
       res.json({
         success: true,
         message: "Route deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // ========== НОВЫЕ ENDPOINTS ==========
+
+  // POST /api/routes/:id/start
+  async startRoute(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const userId = req.user!.id;
+
+      const route = await routeService.startRoute(id as string, userId);
+
+      res.json({
+        success: true,
+        data: route,
+        message: "Route started successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // POST /api/routes/:id/visit-place
+  async visitPlace(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const userId = req.user!.id;
+      const data: VisitPlaceRequest = req.body;
+
+      const route = await routeService.visitPlace(id as string, userId, data);
+
+      res.json({
+        success: true,
+        data: route,
+        message: "Place marked as visited",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // POST /api/routes/:id/complete
+  async completeRoute(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const userId = req.user!.id;
+      const { rating } = req.body;
+
+      const route = await routeService.completeRoute(
+        id as string,
+        userId,
+        rating,
+      );
+
+      res.json({
+        success: true,
+        data: route,
+        message: "Route completed successfully",
       });
     } catch (error) {
       next(error);

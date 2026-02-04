@@ -14,20 +14,72 @@ export const loginValidator: ValidationChain[] = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-// Route Generation Validators
+// Route Generation Validators (обновленные)
 export const generateRouteValidator: ValidationChain[] = [
+  body("location").trim().notEmpty().withMessage("Location is required"),
+  body("scheduledDate")
+    .trim()
+    .notEmpty()
+    .isISO8601()
+    .withMessage("Valid scheduled date is required"),
+  body("scheduledTime")
+    .trim()
+    .notEmpty()
+    .matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
+    .withMessage("Valid time format required (HH:MM)"),
+  body("endTime")
+    .optional()
+    .matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
+    .withMessage("Valid time format required (HH:MM)"),
   body("timeAvailable")
+    .optional()
     .isIn(["2-3 hours", "half-day", "full-day", "weekend"])
     .withMessage("Invalid time option"),
+  body("duration")
+    .optional()
+    .isInt({ min: 30, max: 1440 })
+    .withMessage("Duration must be between 30 and 1440 minutes"),
   body("mood")
     .isArray({ min: 1 })
     .withMessage("At least one mood category required"),
   body("budget")
-    .isIn(["low", "medium", "high", "unlimited"])
-    .withMessage("Invalid budget option"),
-  body("location").optional().trim(),
-  body("companions").optional().isIn(["solo", "couple", "family", "friends"]),
-  body("transportation").optional().isIn(["walking", "car", "public"]),
+    .isFloat({ min: 0 })
+    .withMessage("Budget must be a positive number"),
+  body("companions")
+    .optional()
+    .isIn(["solo", "couple", "family", "friends"])
+    .withMessage("Invalid companions option"),
+  body("transportation")
+    .optional()
+    .isIn(["walking", "car", "public"])
+    .withMessage("Invalid transportation option"),
+  body("mode")
+    .isIn(["quick", "detailed"])
+    .withMessage("Mode must be quick or detailed"),
+  body("mustInclude")
+    .optional()
+    .isArray()
+    .withMessage("mustInclude must be an array"),
+  body("exclude").optional().isArray().withMessage("exclude must be an array"),
+  body("preferences")
+    .optional()
+    .isObject()
+    .withMessage("preferences must be an object"),
+];
+
+// Visit Place Validator
+export const visitPlaceValidator: ValidationChain[] = [
+  body("placeIndex")
+    .isInt({ min: 0 })
+    .withMessage("Place index must be a positive integer"),
+];
+
+// Complete Route Validator
+export const completeRouteValidator: ValidationChain[] = [
+  body("rating")
+    .optional()
+    .isFloat({ min: 1, max: 5 })
+    .withMessage("Rating must be between 1 and 5"),
 ];
 
 // Place Validators

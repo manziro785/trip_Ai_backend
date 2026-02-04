@@ -27,12 +27,12 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
-      const result = await authService.login(email, password);
+      const { token } = await authService.login(email, password);
 
       res.json({
-        success: true,
-        data: result,
-        message: "Login successful",
+        // success: true,
+        token,
+        // message: "Login successful",
       });
     } catch (error) {
       next(error);

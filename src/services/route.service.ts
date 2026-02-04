@@ -1,5 +1,9 @@
 import { prisma } from "../config/database";
-import { RouteGenerationParams } from "../types";
+import {
+  RouteGenerationParams,
+  RouteStatus,
+  VisitPlaceRequest,
+} from "../types";
 import { AIService } from "./ai.service";
 import { AppError } from "../middleware/error.middleware";
 import crypto from "crypto";
@@ -9,8 +13,43 @@ const aiService = new AIService();
 export class RouteService {
   // Generate new route
   async generateRoute(params: RouteGenerationParams, userId: string) {
+    // Валидация scheduledDate и scheduledTime
+    if (!params.scheduledDate || !params.scheduledTime) {
+      throw new AppError("scheduledDate and scheduledTime are required", 400);
+    }
+
+    // Рассчитываем endTime, если не указан
+    let endTime = params.endTime;
+    if (!endTime && params.duration) {
+      // Расчет endTime на основе startTime + duration
+      const [hours, minutes] = params.scheduledTime.split(":").map(Number);
+      const startMinutes = hours * 60 + minutes;
+      const endMinutes = startMinutes + params.duration;
+      const endHours = Math.floor(endMinutes / 60) % 24;
+      const endMins = endMinutes % 60;
+      endTime = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}`;
+    } else if (!endTime && params.timeAvailable) {
+      // Расчет на основе timeAvailable
+      const durationMap: { [key: string]: number } = {
+        "2-3 hours": 180,
+        "half-day": 270,
+        "full-day": 480,
+        weekend: 960,
+      };
+      const duration = durationMap[params.timeAvailable] || 240;
+      const [hours, minutes] = params.scheduledTime.split(":").map(Number);
+      const startMinutes = hours * 60 + minutes;
+      const endMinutes = startMinutes + duration;
+      const endHours = Math.floor(endMinutes / 60) % 24;
+      const endMins = endMinutes % 60;
+      endTime = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}`;
+    }
+
     // Use AI to generate route
     const aiRoute = await aiService.generateRoute(params, userId);
+
+    // Создаем scheduledDate как Date объект
+    const scheduledDateTime = new Date(params.scheduledDate);
 
     // Create route in database
     const route = await prisma.route.create({
@@ -18,11 +57,21 @@ export class RouteService {
         userId,
         name: aiRoute.routeName,
         description: aiRoute.description,
+        status: "SAVED", // По умолчанию SAVED
+        scheduledDate: scheduledDateTime,
+        scheduledTime: params.scheduledTime,
+        endTime: endTime || "18:00",
         params: params as any,
         places: aiRoute.places,
         totalDuration: aiRoute.totalDuration,
         totalCost: aiRoute.totalCost,
         distance: aiRoute.distance,
+        // Поля для активного маршрута
+        startedAt: null,
+        completedAt: null,
+        visitedPlaces: [],
+        currentPlace: 0,
+        rating: null,
       },
       include: {
         user: {
@@ -38,18 +87,28 @@ export class RouteService {
     return route;
   }
 
-  // Get user routes
-  async getUserRoutes(userId: string, page: number = 1, limit: number = 10) {
+  // Get user routes with status filter
+  async getUserRoutes(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+    status?: RouteStatus,
+  ) {
     const skip = (page - 1) * limit;
+
+    const where: any = { userId };
+    if (status) {
+      where.status = status;
+    }
 
     const [routes, total] = await Promise.all([
       prisma.route.findMany({
-        where: { userId },
+        where,
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
       }),
-      prisma.route.count({ where: { userId } }),
+      prisma.route.count({ where }),
     ]);
 
     return {
@@ -61,6 +120,21 @@ export class RouteService {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  // Get active route for user
+  async getActiveRoute(userId: string) {
+    const route = await prisma.route.findFirst({
+      where: {
+        userId,
+        status: "ACTIVE",
+      },
+      orderBy: {
+        startedAt: "desc",
+      },
+    });
+
+    return route;
   }
 
   // Get route by ID
@@ -132,6 +206,149 @@ export class RouteService {
     return { success: true };
   }
 
+  // ========== НОВЫЕ МЕТОДЫ ==========
+
+  // Start route (SAVED → ACTIVE)
+  async startRoute(routeId: string, userId: string) {
+    const route = await prisma.route.findUnique({
+      where: { id: routeId },
+    });
+
+    if (!route) {
+      throw new AppError("Route not found", 404);
+    }
+
+    if (route.userId !== userId) {
+      throw new AppError("Unauthorized", 403);
+    }
+
+    if (route.status === "ACTIVE") {
+      throw new AppError("Route is already active", 400);
+    }
+
+    if (route.status === "ARCHIVED") {
+      throw new AppError("Cannot start archived route", 400);
+    }
+
+    // Проверяем, есть ли уже активный маршрут
+    const activeRoute = await this.getActiveRoute(userId);
+    if (activeRoute) {
+      throw new AppError(
+        "You already have an active route. Complete or pause it first.",
+        400,
+      );
+    }
+
+    const updated = await prisma.route.update({
+      where: { id: routeId },
+      data: {
+        status: "ACTIVE",
+        startedAt: new Date(),
+        currentPlace: 0,
+        visitedPlaces: [],
+      },
+    });
+
+    return updated;
+  }
+
+  // Visit place in route
+  async visitPlace(routeId: string, userId: string, data: VisitPlaceRequest) {
+    const route = await prisma.route.findUnique({
+      where: { id: routeId },
+    });
+
+    if (!route) {
+      throw new AppError("Route not found", 404);
+    }
+
+    if (route.userId !== userId) {
+      throw new AppError("Unauthorized", 403);
+    }
+
+    if (route.status !== "ACTIVE") {
+      throw new AppError("Route is not active", 400);
+    }
+
+    const places = route.places as any[];
+    if (data.placeIndex < 0 || data.placeIndex >= places.length) {
+      throw new AppError("Invalid place index", 400);
+    }
+
+    const placeId = places[data.placeIndex].placeId;
+    const visitedPlaces = (route.visitedPlaces as string[]) || [];
+
+    // Добавляем место в посещенные, если еще не добавлено
+    if (!visitedPlaces.includes(placeId)) {
+      visitedPlaces.push(placeId);
+    }
+
+    // Обновляем currentPlace на следующее место
+    const nextPlace = Math.min(data.placeIndex + 1, places.length);
+
+    const updated = await prisma.route.update({
+      where: { id: routeId },
+      data: {
+        visitedPlaces: visitedPlaces as any,
+        currentPlace: nextPlace,
+      },
+    });
+
+    // Также отмечаем место как посещенное в UserPlaceInteraction
+    try {
+      await prisma.userPlaceInteraction.upsert({
+        where: {
+          userId_placeId: { userId, placeId },
+        },
+        update: {
+          visited: true,
+          visitedAt: new Date(),
+        },
+        create: {
+          userId,
+          placeId,
+          visited: true,
+          visitedAt: new Date(),
+        },
+      });
+    } catch (error) {
+      // Если место не существует в БД, пропускаем
+      console.log("Place not found in database:", placeId);
+    }
+
+    return updated;
+  }
+
+  // Complete route (ACTIVE → ARCHIVED)
+  async completeRoute(routeId: string, userId: string, rating?: number) {
+    const route = await prisma.route.findUnique({
+      where: { id: routeId },
+    });
+
+    if (!route) {
+      throw new AppError("Route not found", 404);
+    }
+
+    if (route.userId !== userId) {
+      throw new AppError("Unauthorized", 403);
+    }
+
+    if (route.status !== "ACTIVE") {
+      throw new AppError("Route is not active", 400);
+    }
+
+    const updated = await prisma.route.update({
+      where: { id: routeId },
+      data: {
+        status: "ARCHIVED",
+        completedAt: new Date(),
+        rating: rating || null,
+      },
+    });
+
+    return updated;
+  }
+
   // Share route
   async shareRoute(routeId: string, userId: string) {
     const route = await prisma.route.findUnique({
@@ -158,7 +375,7 @@ export class RouteService {
     return {
       shareUrl: `${process.env.FRONTEND_URL || "http://localhost:3000"}/routes/shared/${sharedToken}`,
       token: sharedToken,
-      updated,
+      route: updated,
     };
   }
 
@@ -194,6 +411,10 @@ export class RouteService {
 
     if (route.userId !== userId) {
       throw new AppError("Can only rate your own routes", 403);
+    }
+
+    if (rating < 1 || rating > 5) {
+      throw new AppError("Rating must be between 1 and 5", 400);
     }
 
     const updated = await prisma.route.update({
