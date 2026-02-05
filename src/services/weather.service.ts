@@ -93,12 +93,14 @@ export class WeatherService {
       recommendations.push(
         "Сегодня жарко! Рекомендуем крытые места и кафе с кондиционером.",
       );
-      recommendations.push("Не забудь воду и солнцезащитный крем.");
+      recommendations.push("Не забудь воду :)");
     } else if (weather.temp < 5) {
       recommendations.push(
         "Холодно! Лучше посетить музеи и крытые пространства.",
       );
       recommendations.push("Одевайся теплее, если планируешь долго гулять.");
+    } else if (weather.temp < 15) {
+      recommendations.push("Хорошего дня, не забудь хорошо провести время :)");
     } else if (weather.temp >= 15 && weather.temp <= 25) {
       recommendations.push("Отличная погода для прогулок на свежем воздухе!");
     }

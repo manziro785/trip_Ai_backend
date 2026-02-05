@@ -93,24 +93,34 @@ export class InsightService {
   }
 
   // Get random insight
-  async getRandomInsight() {
+  async getRandomInsight(limit = 3) {
     const count = await prisma.insight.count();
-    const skip = Math.floor(Math.random() * count);
 
-    const insight = await prisma.insight.findMany({
-      skip,
-      take: 1,
-      include: {
-        place: {
-          select: {
-            name: true,
-            slug: true,
+    if (count === 0) return [];
+
+    const skips = new Set<number>();
+    while (skips.size < Math.min(limit, count)) {
+      skips.add(Math.floor(Math.random() * count));
+    }
+
+    const insights = await Promise.all(
+      [...skips].map((skip) =>
+        prisma.insight.findMany({
+          skip,
+          take: 1,
+          include: {
+            place: {
+              select: {
+                name: true,
+                slug: true,
+              },
+            },
           },
-        },
-      },
-    });
+        }),
+      ),
+    );
 
-    return insight[0] || null;
+    return insights.map((i) => i[0]).filter(Boolean);
   }
 
   // Get trending insights (most helpful in last 30 days)

@@ -289,13 +289,13 @@ ${params.exclude.map((item) => `- ${item}`).join("\n")}
 ${JSON.stringify(userPreferences, null, 2)}
 `;
 
-    // Список доступных мест
+    // Список доступных мест - FIXED: Added null safety for category
     prompt += `\nAVAILABLE PLACES:
 ${JSON.stringify(
   places.map((p) => ({
     id: p.id,
     name: p.name,
-    category: p.category.name,
+    category: p.category?.name ?? "Uncategorized", // FIX: Use optional chaining and nullish coalescing
     description: p.description,
     priceRange: p.priceRange,
     rating: p.rating,

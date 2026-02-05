@@ -50,7 +50,6 @@ export class AuthController {
         name,
         avatar,
       );
-
       res.json({
         success: true,
         data: result,
