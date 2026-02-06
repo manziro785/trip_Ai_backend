@@ -4,6 +4,9 @@ import { UserPreferences } from "../types";
 
 export class UserService {
   // Get user profile
+  // src/services/user.service.ts
+
+  // Get user profile
   async getProfile(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -19,6 +22,37 @@ export class UserService {
 
     if (!user) {
       throw new AppError("User not found", 404);
+    }
+
+    // ✅ Если preferences нет - создать дефолтные
+    if (!user.preferences) {
+      const defaultPreferences = {
+        favoriteCategories: [],
+        dislikedCategories: [],
+        averageBudget: 1500,
+        companions: "solo",
+        hasCar: false,
+        travelStyle: "moderate",
+        dietaryRestrictions: [],
+        interests: [],
+        fitnessLevel: "medium",
+      };
+
+      // Сохранить в БД
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { preferences: defaultPreferences as any },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatar: true,
+          preferences: true,
+          createdAt: true,
+        },
+      });
+
+      return updatedUser;
     }
 
     return user;
