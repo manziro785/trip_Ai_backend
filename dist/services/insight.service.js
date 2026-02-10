@@ -4,7 +4,6 @@ exports.InsightService = void 0;
 const database_1 = require("../config/database");
 const error_middleware_1 = require("../middleware/error.middleware");
 class InsightService {
-    // Get all insights with filters
     async getInsights(filters) {
         const { category, placeId, page = 1, limit = 20 } = filters;
         const skip = (page - 1) * limit;
@@ -43,7 +42,6 @@ class InsightService {
             },
         };
     }
-    // Get insight by ID
     async getInsightById(insightId) {
         const insight = await database_1.prisma.insight.findUnique({
             where: { id: insightId },
@@ -56,7 +54,6 @@ class InsightService {
         }
         return insight;
     }
-    // Mark insight as helpful
     async markHelpful(insightId) {
         const insight = await database_1.prisma.insight.update({
             where: { id: insightId },
@@ -68,7 +65,6 @@ class InsightService {
         });
         return insight;
     }
-    // Get insights by place
     async getInsightsByPlace(placeId) {
         const insights = await database_1.prisma.insight.findMany({
             where: { placeId },
@@ -76,11 +72,15 @@ class InsightService {
         });
         return insights;
     }
-    // Get random insight
-    async getRandomInsight() {
+    async getRandomInsight(limit = 3) {
         const count = await database_1.prisma.insight.count();
-        const skip = Math.floor(Math.random() * count);
-        const insight = await database_1.prisma.insight.findMany({
+        if (count === 0)
+            return [];
+        const skips = new Set();
+        while (skips.size < Math.min(limit, count)) {
+            skips.add(Math.floor(Math.random() * count));
+        }
+        const insights = await Promise.all([...skips].map((skip) => database_1.prisma.insight.findMany({
             skip,
             take: 1,
             include: {
@@ -91,10 +91,9 @@ class InsightService {
                     },
                 },
             },
-        });
-        return insight[0] || null;
+        })));
+        return insights.map((i) => i[0]).filter(Boolean);
     }
-    // Get trending insights (most helpful in last 30 days)
     async getTrendingInsights(limit = 10) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

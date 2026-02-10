@@ -4,7 +4,6 @@ exports.InsightController = void 0;
 const insight_service_1 = require("../services/insight.service");
 const insightService = new insight_service_1.InsightService();
 class InsightController {
-    // GET /api/insights
     async getInsights(req, res, next) {
         try {
             const { category, placeId, page, limit } = req.query;
@@ -24,7 +23,6 @@ class InsightController {
             next(error);
         }
     }
-    // GET /api/insights/:id
     async getInsightById(req, res, next) {
         try {
             const { id } = req.params;
@@ -38,7 +36,6 @@ class InsightController {
             next(error);
         }
     }
-    // POST /api/insights/:id/helpful
     async markHelpful(req, res, next) {
         try {
             const { id } = req.params;
@@ -53,7 +50,6 @@ class InsightController {
             next(error);
         }
     }
-    // GET /api/insights/by-place/:placeId
     async getInsightsByPlace(req, res, next) {
         try {
             const { placeId } = req.params;
@@ -67,7 +63,6 @@ class InsightController {
             next(error);
         }
     }
-    // GET /api/insights/random
     async getRandomInsight(_req, res, next) {
         try {
             const insight = await insightService.getRandomInsight();
@@ -80,7 +75,6 @@ class InsightController {
             next(error);
         }
     }
-    // GET /api/insights/trending
     async getTrendingInsights(req, res, next) {
         try {
             const limit = parseInt(req.query.limit) || 10;

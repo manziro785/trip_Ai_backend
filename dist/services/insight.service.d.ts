@@ -15,10 +15,12 @@ export declare class InsightService {
             category: string;
             id: string;
             createdAt: Date;
-            description: string;
+            updatedAt: Date | null;
             placeId: string | null;
+            icon: string | null;
             helpfulCount: number;
             title: string;
+            content: string | null;
         })[];
         pagination: {
             page: number;
@@ -32,48 +34,54 @@ export declare class InsightService {
             id: string;
             name: string;
             createdAt: Date;
-            updatedAt: Date;
+            updatedAt: Date | null;
+            rating: number | null;
             lat: number;
             lng: number;
-            description: string;
-            rating: number | null;
+            description: string | null;
             slug: string;
-            categoryId: string;
+            categoryId: string | null;
             address: string | null;
             photos: string[];
-            audioGuideUrl: string | null;
             priceRange: string | null;
-            openingHours: import("@prisma/client/runtime/library").JsonValue | null;
-            tags: string[];
+            openingHours: string | null;
+            phone: string | null;
+            website: string | null;
         } | null;
     } & {
         category: string;
         id: string;
         createdAt: Date;
-        description: string;
+        updatedAt: Date | null;
         placeId: string | null;
+        icon: string | null;
         helpfulCount: number;
         title: string;
+        content: string | null;
     }>;
     markHelpful(insightId: string): Promise<{
         category: string;
         id: string;
         createdAt: Date;
-        description: string;
+        updatedAt: Date | null;
         placeId: string | null;
+        icon: string | null;
         helpfulCount: number;
         title: string;
+        content: string | null;
     }>;
     getInsightsByPlace(placeId: string): Promise<{
         category: string;
         id: string;
         createdAt: Date;
-        description: string;
+        updatedAt: Date | null;
         placeId: string | null;
+        icon: string | null;
         helpfulCount: number;
         title: string;
+        content: string | null;
     }[]>;
-    getRandomInsight(): Promise<{
+    getRandomInsight(limit?: number): Promise<({
         place: {
             name: string;
             slug: string;
@@ -82,11 +90,13 @@ export declare class InsightService {
         category: string;
         id: string;
         createdAt: Date;
-        description: string;
+        updatedAt: Date | null;
         placeId: string | null;
+        icon: string | null;
         helpfulCount: number;
         title: string;
-    }>;
+        content: string | null;
+    })[]>;
     getTrendingInsights(limit?: number): Promise<({
         place: {
             name: string;
@@ -96,10 +106,12 @@ export declare class InsightService {
         category: string;
         id: string;
         createdAt: Date;
-        description: string;
+        updatedAt: Date | null;
         placeId: string | null;
+        icon: string | null;
         helpfulCount: number;
         title: string;
+        content: string | null;
     })[]>;
 }
 //# sourceMappingURL=insight.service.d.ts.map

@@ -15,12 +15,10 @@ exports.AppError = AppError;
 const errorHandler = (err, _req, res, _next) => {
     let statusCode = 500;
     let message = "Internal server error";
-    // App Error
     if (err instanceof AppError) {
         statusCode = err.statusCode;
         message = err.message;
     }
-    // Prisma Errors
     if (err instanceof client_1.Prisma.PrismaClientKnownRequestError) {
         statusCode = 400;
         switch (err.code) {
@@ -37,12 +35,10 @@ const errorHandler = (err, _req, res, _next) => {
                 message = "Database error";
         }
     }
-    // Prisma Validation Error
     if (err instanceof client_1.Prisma.PrismaClientValidationError) {
         statusCode = 400;
         message = "Invalid data provided";
     }
-    // JWT Errors
     if (err.name === "JsonWebTokenError") {
         statusCode = 401;
         message = "Invalid token";
@@ -51,7 +47,6 @@ const errorHandler = (err, _req, res, _next) => {
         statusCode = 401;
         message = "Token expired";
     }
-    // Log error in development
     if (env_1.env.NODE_ENV === "development") {
         console.error("❌ Error:", err);
     }

@@ -4,7 +4,6 @@ exports.UserService = void 0;
 const database_1 = require("../config/database");
 const error_middleware_1 = require("../middleware/error.middleware");
 class UserService {
-    // Get user profile
     async getProfile(userId) {
         const user = await database_1.prisma.user.findUnique({
             where: { id: userId },
@@ -20,9 +19,34 @@ class UserService {
         if (!user) {
             throw new error_middleware_1.AppError("User not found", 404);
         }
+        if (!user.preferences) {
+            const defaultPreferences = {
+                favoriteCategories: [],
+                dislikedCategories: [],
+                averageBudget: 1500,
+                companions: "solo",
+                hasCar: false,
+                travelStyle: "moderate",
+                dietaryRestrictions: [],
+                interests: [],
+                fitnessLevel: "medium",
+            };
+            const updatedUser = await database_1.prisma.user.update({
+                where: { id: userId },
+                data: { preferences: defaultPreferences },
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    avatar: true,
+                    preferences: true,
+                    createdAt: true,
+                },
+            });
+            return updatedUser;
+        }
         return user;
     }
-    // Update profile
     async updateProfile(userId, data) {
         const user = await database_1.prisma.user.update({
             where: { id: userId },
@@ -36,7 +60,6 @@ class UserService {
         });
         return user;
     }
-    // Update preferences
     async updatePreferences(userId, preferences) {
         const user = await database_1.prisma.user.update({
             where: { id: userId },
@@ -48,7 +71,6 @@ class UserService {
         });
         return user;
     }
-    // Get user statistics
     async getUserStats(userId) {
         const [visitedCount, routesCount, wishlistCount] = await Promise.all([
             database_1.prisma.userPlaceInteraction.count({
@@ -61,7 +83,6 @@ class UserService {
                 where: { userId, wishlist: true },
             }),
         ]);
-        // Calculate total travel days (mock for now)
         const routes = await database_1.prisma.route.findMany({
             where: { userId },
             select: { createdAt: true },
@@ -74,7 +95,6 @@ class UserService {
             travelDays: uniqueDays,
         };
     }
-    // Get visit history
     async getVisitHistory(userId, limit = 20) {
         const history = await database_1.prisma.userPlaceInteraction.findMany({
             where: { userId, visited: true },
@@ -100,7 +120,6 @@ class UserService {
         });
         return history;
     }
-    // Mark place as visited
     async markPlaceVisited(userId, placeId) {
         const interaction = await database_1.prisma.userPlaceInteraction.upsert({
             where: {
@@ -119,7 +138,6 @@ class UserService {
         });
         return interaction;
     }
-    // Get wishlist
     async getWishlist(userId) {
         const wishlist = await database_1.prisma.userPlaceInteraction.findMany({
             where: { userId, wishlist: true },
@@ -144,7 +162,6 @@ class UserService {
         });
         return wishlist.map((w) => w.place);
     }
-    // Add to wishlist
     async addToWishlist(userId, placeId) {
         const interaction = await database_1.prisma.userPlaceInteraction.upsert({
             where: {
@@ -161,7 +178,6 @@ class UserService {
         });
         return interaction;
     }
-    // Remove from wishlist
     async removeFromWishlist(userId, placeId) {
         await database_1.prisma.userPlaceInteraction.update({
             where: {
@@ -173,7 +189,6 @@ class UserService {
         });
         return { success: true };
     }
-    // Like/Unlike place
     async toggleLike(userId, placeId) {
         const existing = await database_1.prisma.userPlaceInteraction.findUnique({
             where: {

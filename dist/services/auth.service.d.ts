@@ -10,12 +10,6 @@ export declare class AuthService {
         token: string;
     }>;
     login(email: string, password: string): Promise<{
-        user: {
-            id: string;
-            email: string;
-            name: string | null;
-            avatar: string | null;
-        };
         token: string;
     }>;
     googleAuth(googleId: string, email: string, name: string, avatar?: string): Promise<{

@@ -7,8 +7,7 @@ interface EnvConfig {
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
     GOOGLE_CALLBACK_URL: string;
-    OPENAI_API_KEY: string;
-    GROQ_API_KEY?: string;
+    GROQ_API_KEY: string;
     CLOUDINARY_CLOUD_NAME: string;
     CLOUDINARY_API_KEY: string;
     CLOUDINARY_API_SECRET: string;

@@ -7,7 +7,6 @@ const validators_1 = require("../utils/validators");
 const validation_middleware_1 = require("../middleware/validation.middleware");
 const router = (0, express_1.Router)();
 const placeController = new place_controller_1.PlaceController();
-// Public routes (with optional auth for user-specific data)
 router.get("/", placeController.getPlaces.bind(placeController));
 router.get("/categories", placeController.getCategories.bind(placeController));
 router.get("/nearby", validators_1.nearbyPlacesValidator, validation_middleware_1.validate, placeController.getNearbyPlaces.bind(placeController));

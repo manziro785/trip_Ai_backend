@@ -12,16 +12,13 @@ class WeatherService {
     constructor() {
         this.baseUrl = "https://api.openweathermap.org/data/2.5";
     }
-    // Get current weather
     async getCurrentWeather(lat, lng) {
         try {
-            // Check cache first
             const locationHash = this.getLocationHash(lat, lng);
             const cached = await this.getCachedWeather(locationHash);
             if (cached) {
                 return cached;
             }
-            // Fetch from API
             const response = await axios_1.default.get(`${this.baseUrl}/weather`, {
                 params: {
                     lat,
@@ -41,7 +38,6 @@ class WeatherService {
                 icon: data.weather[0].icon,
                 timestamp: new Date(),
             };
-            // Cache for 30 minutes
             await this.cacheWeather(locationHash, weatherData, 30);
             return weatherData;
         }
@@ -50,7 +46,6 @@ class WeatherService {
             throw new Error("Failed to fetch weather data");
         }
     }
-    // Get weather forecast
     async getForecast(lat, lng, days = 5) {
         try {
             const response = await axios_1.default.get(`${this.baseUrl}/forecast`, {
@@ -60,7 +55,7 @@ class WeatherService {
                     appid: env_1.env.OPENWEATHER_API_KEY,
                     units: "metric",
                     lang: "ru",
-                    cnt: days * 8, // 8 forecasts per day (every 3 hours)
+                    cnt: days * 8,
                 },
             });
             const forecasts = response.data.list.map((item) => ({
@@ -79,39 +74,36 @@ class WeatherService {
             throw new Error("Failed to fetch weather forecast");
         }
     }
-    // Get weather-based recommendations
     async getWeatherRecommendations(lat, lng) {
         const weather = await this.getCurrentWeather(lat, lng);
         const recommendations = [];
-        // Temperature-based
         if (weather.temp > 30) {
-            recommendations.push("Сегодня жарко! Рекомендуем крытые места и кафе с кондиционером.");
-            recommendations.push("Не забудь воду и солнцезащитный крем.");
+            recommendations.push("It's hot today! We recommend indoor places and cafes with air conditioning.");
+            recommendations.push("Don't forget to drink water :)");
         }
         else if (weather.temp < 5) {
-            recommendations.push("Холодно! Лучше посетить музеи и крытые пространства.");
-            recommendations.push("Одевайся теплее, если планируешь долго гулять.");
+            recommendations.push("Dress warmly if you plan to walk for a long time.");
+        }
+        else if (weather.temp < 15) {
+            recommendations.push("Have a nice day, don't forget to enjoy your time :)");
         }
         else if (weather.temp >= 15 && weather.temp <= 25) {
-            recommendations.push("Отличная погода для прогулок на свежем воздухе!");
+            recommendations.push("Great weather for outdoor walks!");
         }
-        // Weather condition-based
-        if (weather.description.includes("дождь") ||
-            weather.description.includes("rain")) {
-            recommendations.push("Дождь! Меняем маршрут на крытые места.");
-            recommendations.push("Рекомендуем рынки, музеи и кафе.");
+        if (weather.description.includes("rain") ||
+            weather.description.includes("дождь")) {
+            recommendations.push("It's raining! Let's switch the route to indoor places.");
+            recommendations.push("We recommend markets, museums, and cafes.");
         }
         if (weather.windSpeed > 10) {
-            recommendations.push("Сильный ветер. Избегаем открытых пространств.");
+            recommendations.push("Strong wind. Avoid open areas.");
         }
         return {
             weather,
             recommendations,
         };
     }
-    // Helper: Generate location hash
     getLocationHash(lat, lng) {
-        // Round to 2 decimals for caching (~1km precision)
         const roundedLat = Math.round(lat * 100) / 100;
         const roundedLng = Math.round(lng * 100) / 100;
         return crypto_1.default
@@ -119,21 +111,18 @@ class WeatherService {
             .update(`${roundedLat},${roundedLng}`)
             .digest("hex");
     }
-    // Helper: Get cached weather
     async getCachedWeather(locationHash) {
         const cached = await database_1.prisma.weatherCache.findUnique({
             where: { locationHash },
         });
         if (!cached)
             return null;
-        // Check if expired
         if (cached.expiresAt < new Date()) {
             await database_1.prisma.weatherCache.delete({ where: { locationHash } });
             return null;
         }
         return cached.data;
     }
-    // Helper: Cache weather data
     async cacheWeather(locationHash, data, minutes) {
         const expiresAt = new Date(Date.now() + minutes * 60 * 1000);
         await database_1.prisma.weatherCache.upsert({

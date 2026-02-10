@@ -3,7 +3,7 @@ export declare class BudgetService {
     createBudget(routeId: string, userId: string, plannedBudget: number): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
+        updatedAt: Date | null;
         routeId: string;
         userId: string;
         plannedBudget: number;
@@ -21,7 +21,7 @@ export declare class BudgetService {
         remaining: number;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
+        updatedAt: Date | null;
         routeId: string;
         userId: string;
         plannedBudget: number;
@@ -30,7 +30,7 @@ export declare class BudgetService {
     updateBudget(routeId: string, userId: string, plannedBudget: number): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
+        updatedAt: Date | null;
         routeId: string;
         userId: string;
         plannedBudget: number;
@@ -42,7 +42,7 @@ export declare class BudgetService {
         remaining: number;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
+        updatedAt: Date | null;
         routeId: string;
         userId: string;
         plannedBudget: number;
@@ -66,7 +66,7 @@ export declare class BudgetService {
     deleteExpense(routeId: string, userId: string, expenseIndex: number): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
+        updatedAt: Date | null;
         routeId: string;
         userId: string;
         plannedBudget: number;

@@ -13,17 +13,17 @@ if (env_1.env.NODE_ENV !== "production") {
 const connectDatabase = async () => {
     try {
         await exports.prisma.$connect();
-        console.log("✅ Database connected successfully");
+        console.log("Database connected successfully");
     }
     catch (error) {
-        console.error("❌ Database connection failed:", error);
+        console.error("Database connection failed:", error);
         process.exit(1);
     }
 };
 exports.connectDatabase = connectDatabase;
 const disconnectDatabase = async () => {
     await exports.prisma.$disconnect();
-    console.log("🔌 Database disconnected");
+    console.log("Database disconnected");
 };
 exports.disconnectDatabase = disconnectDatabase;
 //# sourceMappingURL=database.js.map

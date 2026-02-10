@@ -4,7 +4,6 @@ exports.RouteController = void 0;
 const route_service_1 = require("../services/route.service");
 const routeService = new route_service_1.RouteService();
 class RouteController {
-    // POST /api/routes/generate
     async generateRoute(req, res, next) {
         try {
             const params = req.body;
@@ -20,13 +19,13 @@ class RouteController {
             next(error);
         }
     }
-    // GET /api/routes
     async getUserRoutes(req, res, next) {
         try {
             const userId = req.user.id;
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
-            const result = await routeService.getUserRoutes(userId, page, limit);
+            const status = req.query.status;
+            const result = await routeService.getUserRoutes(userId, page, limit, status);
             res.json({
                 success: true,
                 data: result.routes,
@@ -37,7 +36,19 @@ class RouteController {
             next(error);
         }
     }
-    // GET /api/routes/:id
+    async getActiveRoute(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const route = await routeService.getActiveRoute(userId);
+            res.json({
+                success: true,
+                data: route,
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
     async getRouteById(req, res, next) {
         try {
             const { id } = req.params;
@@ -52,7 +63,6 @@ class RouteController {
             next(error);
         }
     }
-    // PUT /api/routes/:id
     async updateRoute(req, res, next) {
         try {
             const { id } = req.params;
@@ -69,7 +79,6 @@ class RouteController {
             next(error);
         }
     }
-    // DELETE /api/routes/:id
     async deleteRoute(req, res, next) {
         try {
             const { id } = req.params;
@@ -84,7 +93,53 @@ class RouteController {
             next(error);
         }
     }
-    // POST /api/routes/:id/share
+    async startRoute(req, res, next) {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+            const route = await routeService.startRoute(id, userId);
+            res.json({
+                success: true,
+                data: route,
+                message: "Route started successfully",
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async visitPlace(req, res, next) {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+            const data = req.body;
+            const route = await routeService.visitPlace(id, userId, data);
+            res.json({
+                success: true,
+                data: route,
+                message: "Place marked as visited",
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async completeRoute(req, res, next) {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+            const { rating } = req.body;
+            const route = await routeService.completeRoute(id, userId, rating);
+            res.json({
+                success: true,
+                data: route,
+                message: "Route completed successfully",
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
     async shareRoute(req, res, next) {
         try {
             const { id } = req.params;
@@ -99,7 +154,6 @@ class RouteController {
             next(error);
         }
     }
-    // GET /api/routes/shared/:token
     async getSharedRoute(req, res, next) {
         try {
             const { token } = req.params;
@@ -113,7 +167,6 @@ class RouteController {
             next(error);
         }
     }
-    // POST /api/routes/:id/rate
     async rateRoute(req, res, next) {
         try {
             const { id } = req.params;

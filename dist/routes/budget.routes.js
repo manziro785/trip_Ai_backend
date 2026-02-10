@@ -8,7 +8,6 @@ const validation_middleware_1 = require("../middleware/validation.middleware");
 const express_validator_1 = require("express-validator");
 const router = (0, express_1.Router)();
 const budgetController = new budget_controller_1.BudgetController();
-// All routes require authentication
 router.use(auth_middleware_1.authenticate);
 router.post("/:routeId", [(0, express_validator_1.param)("routeId").isUUID(), (0, express_validator_1.body)("plannedBudget").isFloat({ min: 0 })], validation_middleware_1.validate, budgetController.createBudget.bind(budgetController));
 router.get("/:routeId", [(0, express_validator_1.param)("routeId").isUUID()], validation_middleware_1.validate, budgetController.getBudget.bind(budgetController));

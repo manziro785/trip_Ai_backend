@@ -4,7 +4,6 @@ exports.PlaceController = void 0;
 const place_service_1 = require("../services/place.service");
 const placeService = new place_service_1.PlaceService();
 class PlaceController {
-    // GET /api/places
     async getPlaces(req, res, next) {
         try {
             const { categoryId, search, page, limit } = req.query;
@@ -24,7 +23,6 @@ class PlaceController {
             next(error);
         }
     }
-    // GET /api/places/:id
     async getPlaceById(req, res, next) {
         try {
             const { id } = req.params;
@@ -39,7 +37,6 @@ class PlaceController {
             next(error);
         }
     }
-    // GET /api/places/nearby
     async getNearbyPlaces(req, res, next) {
         try {
             const { lat, lng, radius } = req.query;
@@ -53,7 +50,6 @@ class PlaceController {
             next(error);
         }
     }
-    // GET /api/places/categories
     async getCategories(_req, res, next) {
         try {
             const categories = await placeService.getCategories();

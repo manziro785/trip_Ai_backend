@@ -4,7 +4,6 @@ exports.BudgetController = void 0;
 const budget_service_1 = require("../services/budget.service");
 const budgetService = new budget_service_1.BudgetService();
 class BudgetController {
-    // POST /api/budget/:routeId
     async createBudget(req, res, next) {
         try {
             const { routeId } = req.params;
@@ -21,7 +20,6 @@ class BudgetController {
             next(error);
         }
     }
-    // GET /api/budget/:routeId
     async getBudget(req, res, next) {
         try {
             const { routeId } = req.params;
@@ -36,7 +34,6 @@ class BudgetController {
             next(error);
         }
     }
-    // PUT /api/budget/:routeId
     async updateBudget(req, res, next) {
         try {
             const { routeId } = req.params;
@@ -53,7 +50,6 @@ class BudgetController {
             next(error);
         }
     }
-    // POST /api/budget/:routeId/expense
     async addExpense(req, res, next) {
         try {
             const { routeId } = req.params;
@@ -70,7 +66,6 @@ class BudgetController {
             next(error);
         }
     }
-    // GET /api/budget/:routeId/stats
     async getStats(req, res, next) {
         try {
             const { routeId } = req.params;
@@ -85,7 +80,6 @@ class BudgetController {
             next(error);
         }
     }
-    // DELETE /api/budget/:routeId/expense/:index
     async deleteExpense(req, res, next) {
         try {
             const { routeId, index } = req.params;

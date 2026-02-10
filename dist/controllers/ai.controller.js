@@ -5,12 +5,16 @@ const ai_service_1 = require("../services/ai.service");
 const database_1 = require("../config/database");
 const aiService = new ai_service_1.AIService();
 class AIController {
-    // POST /api/ai/chat
     async chat(req, res, next) {
         try {
-            const { message, routeId, context } = req.body;
+            const { message, routeId, context, autoApply = false } = req.body;
             const userId = req.user.id;
-            // Get chat history
+            let currentRoute = null;
+            if (routeId) {
+                currentRoute = await database_1.prisma.route.findUnique({
+                    where: { id: routeId },
+                });
+            }
             const chatHistory = await database_1.prisma.chatMessage.findMany({
                 where: { userId, routeId: routeId || null },
                 orderBy: { createdAt: "desc" },
@@ -21,12 +25,12 @@ class AIController {
                 role: m.role,
                 content: m.message,
             }));
-            // Get AI response
             const response = await aiService.chat(message, {
                 ...context,
+                currentRoute,
+                routeId,
                 chatHistory: formattedHistory,
-            });
-            // Save messages to database
+            }, autoApply);
             await database_1.prisma.chatMessage.createMany({
                 data: [
                     {
@@ -39,23 +43,20 @@ class AIController {
                     {
                         userId,
                         routeId: routeId || null,
-                        message: response,
+                        message: response.message,
                         role: "assistant",
                     },
                 ],
             });
             res.json({
                 success: true,
-                data: {
-                    message: response,
-                },
+                data: response,
             });
         }
         catch (error) {
             next(error);
         }
     }
-    // POST /api/ai/adapt-route
     async adaptRoute(req, res, next) {
         try {
             const { routeId, condition } = req.body;
@@ -70,7 +71,6 @@ class AIController {
             next(error);
         }
     }
-    // GET /api/ai/recommendations
     async getRecommendations(req, res, next) {
         try {
             const userId = req.user.id;

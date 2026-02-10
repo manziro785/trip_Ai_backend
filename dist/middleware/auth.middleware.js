@@ -12,7 +12,7 @@ const authenticate = (req, res, next) => {
             });
             return;
         }
-        const token = authHeader.substring(7); // Remove 'Bearer '
+        const token = authHeader.substring(7);
         const decoded = (0, jwt_1.verifyToken)(token);
         req.user = decoded;
         next();
@@ -36,7 +36,6 @@ const optionalAuth = (req, _res, next) => {
         next();
     }
     catch (error) {
-        // If token is invalid, just continue without user
         next();
     }
 };

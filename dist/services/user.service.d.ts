@@ -31,9 +31,9 @@ export declare class UserService {
         place: {
             category: {
                 name: string;
-                icon: string;
-                color: string;
-            };
+                icon: string | null;
+                color: string | null;
+            } | null;
             id: string;
             name: string;
             slug: string;
@@ -42,44 +42,47 @@ export declare class UserService {
     } & {
         id: string;
         createdAt: Date;
+        updatedAt: Date | null;
         placeId: string;
         userId: string;
         visited: boolean;
         wishlist: boolean;
-        liked: boolean;
         visitedAt: Date | null;
+        liked: boolean;
     })[]>;
     markPlaceVisited(userId: string, placeId: string): Promise<{
         id: string;
         createdAt: Date;
+        updatedAt: Date | null;
         placeId: string;
         userId: string;
         visited: boolean;
         wishlist: boolean;
-        liked: boolean;
         visitedAt: Date | null;
+        liked: boolean;
     }>;
     getWishlist(userId: string): Promise<{
         category: {
             name: string;
-            icon: string;
-            color: string;
-        };
+            icon: string | null;
+            color: string | null;
+        } | null;
         id: string;
         name: string;
-        description: string;
+        description: string | null;
         slug: string;
         photos: string[];
     }[]>;
     addToWishlist(userId: string, placeId: string): Promise<{
         id: string;
         createdAt: Date;
+        updatedAt: Date | null;
         placeId: string;
         userId: string;
         visited: boolean;
         wishlist: boolean;
-        liked: boolean;
         visitedAt: Date | null;
+        liked: boolean;
     }>;
     removeFromWishlist(userId: string, placeId: string): Promise<{
         success: boolean;

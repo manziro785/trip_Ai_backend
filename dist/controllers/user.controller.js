@@ -4,7 +4,6 @@ exports.UserController = void 0;
 const user_service_1 = require("../services/user.service");
 const userService = new user_service_1.UserService();
 class UserController {
-    // GET /api/users/profile
     async getProfile(req, res, next) {
         try {
             const profile = await userService.getProfile(req.user.id);
@@ -17,7 +16,6 @@ class UserController {
             next(error);
         }
     }
-    // PUT /api/users/profile
     async updateProfile(req, res, next) {
         try {
             const { name, avatar } = req.body;
@@ -35,7 +33,6 @@ class UserController {
             next(error);
         }
     }
-    // PUT /api/users/preferences
     async updatePreferences(req, res, next) {
         try {
             const preferences = req.body;
@@ -50,7 +47,6 @@ class UserController {
             next(error);
         }
     }
-    // GET /api/users/stats
     async getStats(req, res, next) {
         try {
             const stats = await userService.getUserStats(req.user.id);
@@ -63,7 +59,6 @@ class UserController {
             next(error);
         }
     }
-    // GET /api/users/history
     async getHistory(req, res, next) {
         try {
             const limit = parseInt(req.query.limit) || 20;
@@ -77,7 +72,6 @@ class UserController {
             next(error);
         }
     }
-    // POST /api/users/visited
     async markVisited(req, res, next) {
         try {
             const { placeId } = req.body;
@@ -91,7 +85,6 @@ class UserController {
             next(error);
         }
     }
-    // GET /api/users/wishlist
     async getWishlist(req, res, next) {
         try {
             const wishlist = await userService.getWishlist(req.user.id);
@@ -104,7 +97,6 @@ class UserController {
             next(error);
         }
     }
-    // POST /api/users/wishlist
     async addToWishlist(req, res, next) {
         try {
             const { placeId } = req.body;
@@ -118,7 +110,6 @@ class UserController {
             next(error);
         }
     }
-    // DELETE /api/users/wishlist/:placeId
     async removeFromWishlist(req, res, next) {
         try {
             const { placeId } = req.params;
@@ -132,7 +123,6 @@ class UserController {
             next(error);
         }
     }
-    // POST /api/users/like/:placeId
     async toggleLike(req, res, next) {
         try {
             const { placeId } = req.params;

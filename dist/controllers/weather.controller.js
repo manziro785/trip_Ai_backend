@@ -4,7 +4,6 @@ exports.WeatherController = void 0;
 const weather_service_1 = require("../services/weather.service");
 const weatherService = new weather_service_1.WeatherService();
 class WeatherController {
-    // GET /api/weather/current
     async getCurrentWeather(req, res, next) {
         try {
             const { lat, lng } = req.query;
@@ -18,7 +17,6 @@ class WeatherController {
             next(error);
         }
     }
-    // GET /api/weather/forecast
     async getForecast(req, res, next) {
         try {
             const { lat, lng, days } = req.query;
@@ -32,7 +30,6 @@ class WeatherController {
             next(error);
         }
     }
-    // GET /api/weather/recommendations
     async getRecommendations(req, res, next) {
         try {
             const { lat, lng } = req.query;

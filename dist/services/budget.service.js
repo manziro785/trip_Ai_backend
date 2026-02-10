@@ -4,7 +4,6 @@ exports.BudgetService = void 0;
 const database_1 = require("../config/database");
 const error_middleware_1 = require("../middleware/error.middleware");
 class BudgetService {
-    // Create budget for route
     async createBudget(routeId, userId, plannedBudget) {
         const route = await database_1.prisma.route.findUnique({
             where: { id: routeId },
@@ -26,7 +25,6 @@ class BudgetService {
         });
         return budget;
     }
-    // Get budget
     async getBudget(routeId, userId) {
         const budget = await database_1.prisma.budgetTracking.findUnique({
             where: {
@@ -37,7 +35,6 @@ class BudgetService {
             throw new error_middleware_1.AppError("Budget not found", 404);
         }
         const expenses = budget.expenses;
-        // Calculate breakdown by category
         const breakdown = {
             food: 0,
             transport: 0,
@@ -54,7 +51,6 @@ class BudgetService {
             remaining: budget.plannedBudget - budget.spent,
         };
     }
-    // Update budget
     async updateBudget(routeId, userId, plannedBudget) {
         const budget = await database_1.prisma.budgetTracking.update({
             where: {
@@ -66,7 +62,6 @@ class BudgetService {
         });
         return budget;
     }
-    // Add expense
     async addExpense(routeId, userId, expense) {
         const budget = await database_1.prisma.budgetTracking.findUnique({
             where: {
@@ -98,7 +93,6 @@ class BudgetService {
             remaining: updated.plannedBudget - newSpent,
         };
     }
-    // Get budget statistics
     async getBudgetStats(routeId, userId) {
         const budget = await this.getBudget(routeId, userId);
         const expenses = budget.expenses;
@@ -114,7 +108,6 @@ class BudgetService {
         };
         return stats;
     }
-    // Delete expense (by index)
     async deleteExpense(routeId, userId, expenseIndex) {
         const budget = await database_1.prisma.budgetTracking.findUnique({
             where: {
