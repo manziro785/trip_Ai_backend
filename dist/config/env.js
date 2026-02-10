@@ -26,7 +26,7 @@ exports.env = {
     CLOUDINARY_CLOUD_NAME: getEnvVar("CLOUDINARY_CLOUD_NAME"),
     CLOUDINARY_API_KEY: getEnvVar("CLOUDINARY_API_KEY"),
     CLOUDINARY_API_SECRET: getEnvVar("CLOUDINARY_API_SECRET"),
-    OPENWEATHER_API_KEY: getEnvVar("OPENWEATHER_API_KEY"),
+    OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY,
     FRONTEND_URL: getEnvVar("FRONTEND_URL", "http://localhost:3000"),
 };
 //# sourceMappingURL=env.js.map

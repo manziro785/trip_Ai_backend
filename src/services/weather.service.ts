@@ -8,6 +8,9 @@ export class WeatherService {
   private baseUrl = "https://api.openweathermap.org/data/2.5";
 
   async getCurrentWeather(lat: number, lng: number): Promise<WeatherData> {
+    if (!env.OPENWEATHER_API_KEY) {
+      throw new Error("OPENWEATHER_API_KEY is not set");
+    }
     try {
       const locationHash = this.getLocationHash(lat, lng);
       const cached = await this.getCachedWeather(locationHash);
@@ -48,6 +51,9 @@ export class WeatherService {
   }
 
   async getForecast(lat: number, lng: number, days: number = 5) {
+    if (!env.OPENWEATHER_API_KEY) {
+      throw new Error("OPENWEATHER_API_KEY is not set");
+    }
     try {
       const response = await axios.get(`${this.baseUrl}/forecast`, {
         params: {

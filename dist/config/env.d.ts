@@ -11,7 +11,7 @@ interface EnvConfig {
     CLOUDINARY_CLOUD_NAME: string;
     CLOUDINARY_API_KEY: string;
     CLOUDINARY_API_SECRET: string;
-    OPENWEATHER_API_KEY: string;
+    OPENWEATHER_API_KEY?: string;
     FRONTEND_URL: string;
 }
 export declare const env: EnvConfig;
