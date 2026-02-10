@@ -5,7 +5,6 @@ import { BudgetService } from "../services/budget.service";
 const budgetService = new BudgetService();
 
 export class BudgetController {
-  // POST /api/budget/:routeId
   async createBudget(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { routeId } = req.params;
@@ -28,7 +27,6 @@ export class BudgetController {
     }
   }
 
-  // GET /api/budget/:routeId
   async getBudget(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { routeId } = req.params;
@@ -45,7 +43,6 @@ export class BudgetController {
     }
   }
 
-  // PUT /api/budget/:routeId
   async updateBudget(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { routeId } = req.params;
@@ -68,7 +65,6 @@ export class BudgetController {
     }
   }
 
-  // POST /api/budget/:routeId/expense
   async addExpense(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { routeId } = req.params;
@@ -91,7 +87,6 @@ export class BudgetController {
     }
   }
 
-  // GET /api/budget/:routeId/stats
   async getStats(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { routeId } = req.params;
@@ -111,7 +106,6 @@ export class BudgetController {
     }
   }
 
-  // DELETE /api/budget/:routeId/expense/:index
   async deleteExpense(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { routeId, index } = req.params;

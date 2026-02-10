@@ -5,7 +5,6 @@ import { RouteService } from "../services/route.service";
 const routeService = new RouteService();
 
 export class RouteController {
-  // POST /api/routes/generate
   async generateRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const params = req.body;
@@ -23,7 +22,6 @@ export class RouteController {
     }
   }
 
-  // GET /api/routes
   async getUserRoutes(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
@@ -48,7 +46,6 @@ export class RouteController {
     }
   }
 
-  // GET /api/routes/active
   async getActiveRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
@@ -63,7 +60,6 @@ export class RouteController {
     }
   }
 
-  // GET /api/routes/:id
   async getRouteById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -80,7 +76,6 @@ export class RouteController {
     }
   }
 
-  // PUT /api/routes/:id
   async updateRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -99,7 +94,6 @@ export class RouteController {
     }
   }
 
-  // DELETE /api/routes/:id
   async deleteRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -116,9 +110,7 @@ export class RouteController {
     }
   }
 
-  // ========== НОВЫЕ ENDPOINTS ==========
 
-  // POST /api/routes/:id/start
   async startRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -136,7 +128,6 @@ export class RouteController {
     }
   }
 
-  // POST /api/routes/:id/visit-place
   async visitPlace(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -155,7 +146,6 @@ export class RouteController {
     }
   }
 
-  // POST /api/routes/:id/complete
   async completeRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -178,7 +168,6 @@ export class RouteController {
     }
   }
 
-  // POST /api/routes/:id/share
   async shareRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -195,7 +184,6 @@ export class RouteController {
     }
   }
 
-  // GET /api/routes/shared/:token
   async getSharedRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { token } = req.params;
@@ -210,7 +198,6 @@ export class RouteController {
     }
   }
 
-  // POST /api/routes/:id/rate
   async rateRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;

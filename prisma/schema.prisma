@@ -1,15 +1,12 @@
-// ==================== GENERATOR ====================
 generator client {
   provider = "prisma-client-js"
 }
 
-// ==================== DATASOURCE ====================
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// ==================== USER ====================
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -31,7 +28,6 @@ model User {
   @@map("users")
 }
 
-// ==================== CATEGORY ====================
 model Category {
   id          String   @id @default(uuid())
   name        String
@@ -48,7 +44,6 @@ model Category {
   @@map("categories")
 }
 
-// ==================== PLACE ====================
 model Place {
   id          String   @id @default(uuid())
   name        String
@@ -79,7 +74,6 @@ model Place {
   @@map("places")
 }
 
-// ==================== ROUTE ====================
 model Route {
   id     String @id @default(uuid())
 
@@ -89,7 +83,7 @@ model Route {
   name        String
   description String?
 
-  status String @default("SAVED") // SAVED | ACTIVE | ARCHIVED
+  status String @default("SAVED")
 
   scheduledDate DateTime?
   scheduledTime String?
@@ -119,7 +113,6 @@ model Route {
   @@map("routes")
 }
 
-// ==================== USER PLACE INTERACTION ====================
 model UserPlaceInteraction {
   id String @id @default(uuid())
 
@@ -141,7 +134,6 @@ model UserPlaceInteraction {
   @@map("user_place_interactions")
 }
 
-// ==================== CHAT MESSAGE ====================
 model ChatMessage {
   id String @id @default(uuid())
 
@@ -160,7 +152,6 @@ model ChatMessage {
   @@map("chat_messages")
 }
 
-// ==================== BUDGET TRACKING ====================
 model BudgetTracking {
   id String @id @default(uuid())
 
@@ -181,7 +172,6 @@ model BudgetTracking {
   @@map("budget_trackings")
 }
 
-// ==================== INSIGHT ====================
 model Insight {
   id String @id @default(uuid())
 
@@ -201,7 +191,6 @@ model Insight {
   @@map("insights")
 }
 
-// ==================== WEATHER CACHE ====================
 model WeatherCache {
   id           String   @id @default(uuid())
   locationHash String   @unique

@@ -8,7 +8,6 @@ import { body } from "express-validator";
 const router = Router();
 const aiController = new AIController();
 
-// All AI routes require authentication
 router.use(authenticate);
 
 router.post(

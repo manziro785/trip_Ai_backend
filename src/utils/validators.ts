@@ -1,6 +1,5 @@
 import { body, param, query, ValidationChain } from "express-validator";
 
-// Auth Validators
 export const registerValidator: ValidationChain[] = [
   body("email").isEmail().withMessage("Invalid email address"),
   body("password")
@@ -14,7 +13,6 @@ export const loginValidator: ValidationChain[] = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-// Route Generation Validators (обновленные)
 export const generateRouteValidator: ValidationChain[] = [
   body("location").trim().notEmpty().withMessage("Location is required"),
   body("scheduledDate")
@@ -67,14 +65,12 @@ export const generateRouteValidator: ValidationChain[] = [
     .withMessage("preferences must be an object"),
 ];
 
-// Visit Place Validator
 export const visitPlaceValidator: ValidationChain[] = [
   body("placeIndex")
     .isInt({ min: 0 })
     .withMessage("Place index must be a positive integer"),
 ];
 
-// Complete Route Validator
 export const completeRouteValidator: ValidationChain[] = [
   body("rating")
     .optional()
@@ -82,7 +78,6 @@ export const completeRouteValidator: ValidationChain[] = [
     .withMessage("Rating must be between 1 and 5"),
 ];
 
-// Place Validators
 export const placeIdValidator: ValidationChain[] = [
   param("id").isUUID().withMessage("Invalid place ID"),
 ];
@@ -96,7 +91,6 @@ export const nearbyPlacesValidator: ValidationChain[] = [
     .withMessage("Radius must be 1-50 km"),
 ];
 
-// Budget Validators
 export const addExpenseValidator: ValidationChain[] = [
   body("category")
     .isIn(["food", "transport", "entrance", "other"])
@@ -106,9 +100,9 @@ export const addExpenseValidator: ValidationChain[] = [
   body("placeId").optional().isUUID(),
 ];
 
-// Chat Validators
 export const chatMessageValidator: ValidationChain[] = [
   body("message").trim().notEmpty().withMessage("Message is required"),
   body("routeId").optional().isUUID(),
   body("context").optional().isObject(),
+  body("autoApply").optional().isBoolean(),
 ];

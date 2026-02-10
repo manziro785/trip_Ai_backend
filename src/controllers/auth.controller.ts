@@ -5,7 +5,6 @@ import { AuthService } from "../services/auth.service";
 const authService = new AuthService();
 
 export class AuthController {
-  // POST /api/auth/register
   async register(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { email, password, name } = req.body;
@@ -22,7 +21,6 @@ export class AuthController {
     }
   }
 
-  // POST /api/auth/login
   async login(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
@@ -30,16 +28,13 @@ export class AuthController {
       const { token } = await authService.login(email, password);
 
       res.json({
-        // success: true,
         token,
-        // message: "Login successful",
       });
     } catch (error) {
       next(error);
     }
   }
 
-  // POST /api/auth/google
   async googleAuth(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { googleId, email, name, avatar } = req.body;
@@ -60,10 +55,8 @@ export class AuthController {
     }
   }
 
-  // GET /api/auth/me
   async getCurrentUser(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      // User is already attached by auth middleware
       res.json({
         success: true,
         data: req.user,

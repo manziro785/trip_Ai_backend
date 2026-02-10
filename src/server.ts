@@ -5,7 +5,6 @@ import { env } from "./config/env";
 import { connectDatabase } from "./config/database";
 import { errorHandler, notFound } from "./middleware/error.middleware";
 
-// Import routes
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import placeRoutes from "./routes/place.routes";
@@ -17,7 +16,6 @@ import insightRoutes from "./routes/insight.routes";
 
 const app: Application = express();
 
-// Middleware
 app.use(
   cors({
     origin: env.FRONTEND_URL,
@@ -28,7 +26,6 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(morgan(env.NODE_ENV === "development" ? "dev" : "combined"));
 
-// Health check
 app.get("/health", (_req, res) => {
   res.json({
     success: true,
@@ -38,7 +35,6 @@ app.get("/health", (_req, res) => {
   });
 });
 
-// API Info
 app.get("/api", (_req, res) => {
   res.json({
     success: true,
@@ -57,7 +53,6 @@ app.get("/api", (_req, res) => {
   });
 });
 
-// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/places", placeRoutes);
@@ -67,19 +62,14 @@ app.use("/api/weather", weatherRoutes);
 app.use("/api/budget", budgetRoutes);
 app.use("/api/insights", insightRoutes);
 
-// 404 Handler
 app.use(notFound);
 
-// Error Handler
 app.use(errorHandler);
 
-// Start server
 const startServer = async () => {
   try {
-    // Connect to database
     await connectDatabase();
 
-    // Start listening
     app.listen(env.PORT, () => {
       console.log(`
 ╔═══════════════════════════════════════╗
@@ -108,13 +98,11 @@ const startServer = async () => {
   }
 };
 
-// Handle unhandled promise rejections
 process.on("unhandledRejection", (err: Error) => {
   console.error("❌ Unhandled Rejection:", err);
   process.exit(1);
 });
 
-// Handle SIGTERM
 process.on("SIGTERM", () => {
   console.log("👋 SIGTERM received, shutting down gracefully...");
   process.exit(0);

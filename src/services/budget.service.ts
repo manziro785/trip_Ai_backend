@@ -3,7 +3,6 @@ import { AppError } from "../middleware/error.middleware";
 import { BudgetExpense } from "../types";
 
 export class BudgetService {
-  // Create budget for route
   async createBudget(routeId: string, userId: string, plannedBudget: number) {
     const route = await prisma.route.findUnique({
       where: { id: routeId },
@@ -30,7 +29,6 @@ export class BudgetService {
     return budget;
   }
 
-  // Get budget
   async getBudget(routeId: string, userId: string) {
     const budget = await prisma.budgetTracking.findUnique({
       where: {
@@ -44,7 +42,6 @@ export class BudgetService {
 
     const expenses = budget.expenses as unknown as BudgetExpense[];
 
-    // Calculate breakdown by category
     const breakdown = {
       food: 0,
       transport: 0,
@@ -64,7 +61,6 @@ export class BudgetService {
     };
   }
 
-  // Update budget
   async updateBudget(routeId: string, userId: string, plannedBudget: number) {
     const budget = await prisma.budgetTracking.update({
       where: {
@@ -78,7 +74,6 @@ export class BudgetService {
     return budget;
   }
 
-  // Add expense
   async addExpense(
     routeId: string,
     userId: string,
@@ -121,7 +116,6 @@ export class BudgetService {
     };
   }
 
-  // Get budget statistics
   async getBudgetStats(routeId: string, userId: string) {
     const budget = await this.getBudget(routeId, userId);
     const expenses = budget.expenses as BudgetExpense[];
@@ -141,7 +135,6 @@ export class BudgetService {
     return stats;
   }
 
-  // Delete expense (by index)
   async deleteExpense(routeId: string, userId: string, expenseIndex: number) {
     const budget = await prisma.budgetTracking.findUnique({
       where: {

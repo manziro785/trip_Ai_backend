@@ -5,7 +5,6 @@ import { PlaceService } from "../services/place.service";
 const placeService = new PlaceService();
 
 export class PlaceController {
-  // GET /api/places
   async getPlaces(req: Request, res: Response, next: NextFunction) {
     try {
       const { categoryId, search, page, limit } = req.query;
@@ -27,7 +26,6 @@ export class PlaceController {
     }
   }
 
-  // GET /api/places/:id
   async getPlaceById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -44,7 +42,6 @@ export class PlaceController {
     }
   }
 
-  // GET /api/places/nearby
   async getNearbyPlaces(req: Request, res: Response, next: NextFunction) {
     try {
       const { lat, lng, radius } = req.query;
@@ -64,7 +61,6 @@ export class PlaceController {
     }
   }
 
-  // GET /api/places/categories
   async getCategories(_req: Request, res: Response, next: NextFunction) {
     try {
       const categories = await placeService.getCategories();

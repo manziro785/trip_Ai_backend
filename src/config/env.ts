@@ -7,11 +7,10 @@ interface EnvConfig {
   PORT: number;
   DATABASE_URL: string;
   JWT_SECRET: string;
-  JWT_EXPIRES_IN: string | number; // Changed from just 'string'
+  JWT_EXPIRES_IN: string | number;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   GOOGLE_CALLBACK_URL: string;
-  // OPENAI_API_KEY: string;
   GROQ_API_KEY: string;
   CLOUDINARY_CLOUD_NAME: string;
   CLOUDINARY_API_KEY: string;
@@ -37,7 +36,7 @@ export const env: EnvConfig = {
   GOOGLE_CLIENT_ID: getEnvVar("GOOGLE_CLIENT_ID"),
   GOOGLE_CLIENT_SECRET: getEnvVar("GOOGLE_CLIENT_SECRET"),
   GOOGLE_CALLBACK_URL: getEnvVar("GOOGLE_CALLBACK_URL"),
-  GROQ_API_KEY: getEnvVar("GROQ_API_KEY"), // Сделайте обязательным
+  GROQ_API_KEY: getEnvVar("GROQ_API_KEY"),
   CLOUDINARY_CLOUD_NAME: getEnvVar("CLOUDINARY_CLOUD_NAME"),
   CLOUDINARY_API_KEY: getEnvVar("CLOUDINARY_API_KEY"),
   CLOUDINARY_API_SECRET: getEnvVar("CLOUDINARY_API_SECRET"),

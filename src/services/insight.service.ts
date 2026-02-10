@@ -2,7 +2,6 @@ import { prisma } from "../config/database";
 import { AppError } from "../middleware/error.middleware";
 
 export class InsightService {
-  // Get all insights with filters
   async getInsights(filters: {
     category?: string;
     placeId?: string;
@@ -52,7 +51,6 @@ export class InsightService {
     };
   }
 
-  // Get insight by ID
   async getInsightById(insightId: string) {
     const insight = await prisma.insight.findUnique({
       where: { id: insightId },
@@ -68,7 +66,6 @@ export class InsightService {
     return insight;
   }
 
-  // Mark insight as helpful
   async markHelpful(insightId: string) {
     const insight = await prisma.insight.update({
       where: { id: insightId },
@@ -82,7 +79,6 @@ export class InsightService {
     return insight;
   }
 
-  // Get insights by place
   async getInsightsByPlace(placeId: string) {
     const insights = await prisma.insight.findMany({
       where: { placeId },
@@ -92,7 +88,6 @@ export class InsightService {
     return insights;
   }
 
-  // Get random insight
   async getRandomInsight(limit = 3) {
     const count = await prisma.insight.count();
 
@@ -123,7 +118,6 @@ export class InsightService {
     return insights.map((i) => i[0]).filter(Boolean);
   }
 
-  // Get trending insights (most helpful in last 30 days)
   async getTrendingInsights(limit: number = 10) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

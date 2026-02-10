@@ -4,7 +4,6 @@ import { WeatherService } from "../services/weather.service";
 const weatherService = new WeatherService();
 
 export class WeatherController {
-  // GET /api/weather/current
   async getCurrentWeather(req: Request, res: Response, next: NextFunction) {
     try {
       const { lat, lng } = req.query;
@@ -23,7 +22,6 @@ export class WeatherController {
     }
   }
 
-  // GET /api/weather/forecast
   async getForecast(req: Request, res: Response, next: NextFunction) {
     try {
       const { lat, lng, days } = req.query;
@@ -43,7 +41,6 @@ export class WeatherController {
     }
   }
 
-  // GET /api/weather/recommendations
   async getRecommendations(req: Request, res: Response, next: NextFunction) {
     try {
       const { lat, lng } = req.query;

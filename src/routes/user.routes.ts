@@ -7,10 +7,8 @@ import { validate } from "../middleware/validation.middleware";
 const router = Router();
 const userController = new UserController();
 
-// All routes require authentication
 router.use(authenticate);
 
-// Profile
 router.get("/profile", userController.getProfile.bind(userController));
 router.put(
   "/profile",
@@ -19,19 +17,15 @@ router.put(
   userController.updateProfile.bind(userController),
 );
 
-// Preferences
 router.put(
   "/preferences",
   userController.updatePreferences.bind(userController),
 );
 
-// Stats
 router.get("/stats", userController.getStats.bind(userController));
 
-// History
 router.get("/history", userController.getHistory.bind(userController));
 
-// Visited
 router.post(
   "/visited",
   [body("placeId").isUUID()],
@@ -39,7 +33,6 @@ router.post(
   userController.markVisited.bind(userController),
 );
 
-// Wishlist
 router.get("/wishlist", userController.getWishlist.bind(userController));
 router.post(
   "/wishlist",
@@ -52,7 +45,6 @@ router.delete(
   userController.removeFromWishlist.bind(userController),
 );
 
-// Like
 router.post("/like/:placeId", userController.toggleLike.bind(userController));
 
 export default router;

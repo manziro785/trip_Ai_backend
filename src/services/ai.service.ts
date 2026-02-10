@@ -12,16 +12,13 @@ export class AIService {
     });
   }
 
-  // Generate route using AI
   async generateRoute(params: RouteGenerationParams, userId?: string) {
-    // Get available places from database
     const places = await prisma.place.findMany({
       include: {
         category: true,
       },
     });
 
-    // Get user preferences if userId provided
     let userPreferences: any = {};
     if (userId) {
       const user = await prisma.user.findUnique({
@@ -30,7 +27,6 @@ export class AIService {
       });
       userPreferences = user?.preferences || {};
 
-      // Get user's visited places
       const visitedPlaces = await prisma.userPlaceInteraction.findMany({
         where: { userId, visited: true },
         select: { placeId: true },
@@ -38,10 +34,8 @@ export class AIService {
       userPreferences.visitedPlaceIds = visitedPlaces.map((v) => v.placeId);
     }
 
-    // Create AI prompt
     const prompt = this.createRoutePrompt(params, places, userPreferences);
 
-    // Call Groq
     const completion = await this.groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
@@ -79,36 +73,49 @@ export class AIService {
     return routeData;
   }
 
-  // Chat with AI
-  async chat(message: string, context?: any) {
-    const systemMessage = `You are Nomad AI, a helpful travel assistant for Kyrgyzstan. 
-    You help travelers with:
-    - Finding places (restaurants, attractions, etc.)
-    - Route modifications
-    - Local tips and recommendations
-    - Practical questions (toilets, weather, etc.)
-    
-    Be concise, helpful, and friendly. Use emojis when appropriate.`;
+
+  async chat(message: string, context?: any, autoApply: boolean = false) {
+    const systemMessage = `You are Nomad AI, a helpful travel assistant for Kyrgyzstan.
+
+IMPORTANT ABILITIES:
+- You can MODIFY routes based on user requests
+- If user wants to change their route, respond with JSON action
+- You understand natural language route modifications
+
+ROUTE MODIFICATION EXAMPLES:
+User: "Убери кафе из маршрута"
+→ Action: Remove all places with category "food"
+
+User: "Хочу только достопримечательности"
+→ Action: Keep only "history" category places
+
+User: "Добавь еще одно место для обеда"
+→ Action: Add a restaurant
+
+When user wants to modify route, respond with:
+{
+  "action": "modify_route",
+  "explanation": "Removed all cafes, kept only attractions",
+  "modifications": {
+    "remove": ["place-id-1"],
+    "add": [...],
+    "filter": { "categories": ["history", "nature"] }
+  }
+}
+
+For simple questions, just respond with text.`;
 
     const messages: any[] = [{ role: "system", content: systemMessage }];
 
-    // Add context if provided
     if (context?.currentRoute) {
       messages.push({
         role: "system",
-        content: `Current route context: ${JSON.stringify(context.currentRoute)}`,
-      });
-    }
-
-    if (context?.currentPlace) {
-      messages.push({
-        role: "system",
-        content: `User is currently at: ${context.currentPlace}`,
+        content: `Current route: ${JSON.stringify(context.currentRoute)}`,
       });
     }
 
     if (context?.chatHistory && context.chatHistory.length > 0) {
-      messages.push(...context.chatHistory.slice(-5)); // Last 5 messages
+      messages.push(...context.chatHistory.slice(-5));
     }
 
     messages.push({ role: "user", content: message });
@@ -117,18 +124,108 @@ export class AIService {
       model: "llama-3.3-70b-versatile",
       messages,
       temperature: 0.8,
-      max_tokens: 500,
+      max_tokens: 1000,
     });
 
-    return (
-      completion.choices[0].message.content ||
-      "Sorry, I could not generate a response."
-    );
+    const responseText = completion.choices[0].message.content || "";
+
+    try {
+      const parsed = JSON.parse(responseText);
+
+      if (parsed.action === "modify_route" && autoApply && context?.routeId) {
+        const updatedRoute = await this.applyRouteModifications(
+          context.routeId,
+          parsed.modifications,
+          context.currentRoute,
+        );
+
+        return {
+          message: parsed.explanation,
+          routeUpdated: true,
+          updatedRoute,
+        };
+      }
+
+      return {
+        message: parsed.explanation || responseText,
+        action: parsed.action,
+        modifications: parsed.modifications,
+      };
+    } catch {
+      return {
+        message: responseText,
+        routeUpdated: false,
+      };
+    }
   }
 
-  // Adapt route based on conditions
+  private async applyRouteModifications(
+    routeId: string,
+    modifications: any,
+    currentRoute: any,
+  ) {
+    const { remove, add, filter } = modifications;
+    let places = [...currentRoute.places];
+
+    if (remove && remove.length > 0) {
+      places = places.filter((p) => !remove.includes(p.placeId));
+    }
+
+    if (filter?.categories) {
+      places = places.filter((p) =>
+        filter.categories.includes(p.category.toLowerCase()),
+      );
+    }
+
+    if (add && add.length > 0) {
+      places = [...places, ...add];
+    }
+
+    let totalDuration = 0;
+    let totalCost = 0;
+    let currentTime = currentRoute.scheduledTime;
+
+    places = places.map((place, index) => {
+      const startTime = currentTime;
+      const endTime = this.addMinutes(currentTime, place.duration);
+
+      totalDuration += place.duration;
+      totalCost += place.estimatedCost;
+
+      if (index < places.length - 1) {
+        const travelTime = place.transportFromPrevious?.duration || 15;
+        currentTime = this.addMinutes(endTime, travelTime);
+        totalDuration += travelTime;
+      }
+
+      return {
+        ...place,
+        startTime,
+        endTime,
+      };
+    });
+
+    const updatedRoute = await prisma.route.update({
+      where: { id: routeId },
+      data: {
+        places: places as any,
+        totalDuration,
+        totalCost,
+      },
+    });
+
+    return updatedRoute;
+  }
+
+  private addMinutes(time: string, minutes: number): string {
+    const [hours, mins] = time.split(":").map(Number);
+    const totalMinutes = hours * 60 + mins + minutes;
+    const newHours = Math.floor(totalMinutes / 60) % 24;
+    const newMins = totalMinutes % 60;
+    return `${String(newHours).padStart(2, "0")}:${String(newMins).padStart(2, "0")}`;
+  }
+
   async adaptRoute(routeId: string, condition: string, _userId: string) {
-    // Get current route
     const route = await prisma.route.findUnique({
       where: { id: routeId },
     });
@@ -184,7 +281,6 @@ export class AIService {
     return JSON.parse(responseText);
   }
 
-  // Get personalized recommendations
   async getRecommendations(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -241,7 +337,6 @@ export class AIService {
     return JSON.parse(responseText);
   }
 
-  // Helper: Create route generation prompt
   private createRoutePrompt(
     params: RouteGenerationParams,
     places: any[],
@@ -249,7 +344,6 @@ export class AIService {
   ): string {
     const isDetailedMode = params.mode === "detailed";
 
-    // Базовый промпт
     let prompt = `Create a personalized travel route for Kyrgyzstan with these parameters:
 
 LOCATION: ${params.location}
@@ -263,7 +357,6 @@ TRANSPORTATION: ${params.transportation || "walking"}
 MODE: ${params.mode}
 `;
 
-    // Для детального режима
     if (isDetailedMode && params.mustInclude && params.mustInclude.length > 0) {
       prompt += `\nMUST INCLUDE (обязательно):
 ${params.mustInclude.map((item) => `- ${item}`).join("\n")}
@@ -284,31 +377,28 @@ ${params.exclude.map((item) => `- ${item}`).join("\n")}
 `;
     }
 
-    // Предпочтения пользователя
     prompt += `\nUSER PREFERENCES (learned from history):
 ${JSON.stringify(userPreferences, null, 2)}
 `;
 
-    // Список доступных мест - FIXED: Added null safety for category
     prompt += `\nAVAILABLE PLACES:
 ${JSON.stringify(
   places.map((p) => ({
     id: p.id,
     name: p.name,
-    category: p.category?.name ?? "Uncategorized", // FIX: Use optional chaining and nullish coalescing
+    category: p.category?.name ?? "Uncategorized",
     description: p.description,
     priceRange: p.priceRange,
     rating: p.rating,
     lat: p.lat,
     lng: p.lng,
-    openingHours: p.openingHours || "9:00-21:00", // Default если нет
+    openingHours: p.openingHours || "9:00-21:00",
   })),
   null,
   2,
 )}
 `;
 
-    // Инструкции
     prompt += `\nCreate a route that:
 1. Matches the user's time, mood, and budget
 2. ${isDetailedMode && params.mustInclude ? "INCLUDES ALL items from mustInclude list" : "Follows mood preferences"}

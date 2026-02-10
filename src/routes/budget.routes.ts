@@ -8,7 +8,6 @@ import { body, param } from "express-validator";
 const router = Router();
 const budgetController = new BudgetController();
 
-// All routes require authentication
 router.use(authenticate);
 
 router.post(

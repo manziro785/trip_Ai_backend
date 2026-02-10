@@ -18,7 +18,7 @@ export const authenticate = (
       return;
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer '
+    const token = authHeader.substring(7);
 
     const decoded = verifyToken(token);
     req.user = decoded;
@@ -48,7 +48,6 @@ export const optionalAuth = (
 
     next();
   } catch (error) {
-    // If token is invalid, just continue without user
     next();
   }
 };

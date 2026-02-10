@@ -7,10 +7,8 @@ import { WeatherData } from "../types";
 export class WeatherService {
   private baseUrl = "https://api.openweathermap.org/data/2.5";
 
-  // Get current weather
   async getCurrentWeather(lat: number, lng: number): Promise<WeatherData> {
     try {
-      // Check cache first
       const locationHash = this.getLocationHash(lat, lng);
       const cached = await this.getCachedWeather(locationHash);
 
@@ -18,7 +16,6 @@ export class WeatherService {
         return cached;
       }
 
-      // Fetch from API
       const response = await axios.get(`${this.baseUrl}/weather`, {
         params: {
           lat,
@@ -41,7 +38,6 @@ export class WeatherService {
         timestamp: new Date(),
       };
 
-      // Cache for 30 minutes
       await this.cacheWeather(locationHash, weatherData, 30);
 
       return weatherData;
@@ -51,7 +47,6 @@ export class WeatherService {
     }
   }
 
-  // Get weather forecast
   async getForecast(lat: number, lng: number, days: number = 5) {
     try {
       const response = await axios.get(`${this.baseUrl}/forecast`, {
@@ -61,7 +56,7 @@ export class WeatherService {
           appid: env.OPENWEATHER_API_KEY,
           units: "metric",
           lang: "ru",
-          cnt: days * 8, // 8 forecasts per day (every 3 hours)
+          cnt: days * 8,
         },
       });
 
@@ -82,40 +77,38 @@ export class WeatherService {
     }
   }
 
-  // Get weather-based recommendations
   async getWeatherRecommendations(lat: number, lng: number) {
     const weather = await this.getCurrentWeather(lat, lng);
 
     const recommendations: string[] = [];
 
-    // Temperature-based
     if (weather.temp > 30) {
       recommendations.push(
-        "Сегодня жарко! Рекомендуем крытые места и кафе с кондиционером.",
+        "It's hot today! We recommend indoor places and cafes with air conditioning.",
       );
-      recommendations.push("Не забудь воду :)");
+      recommendations.push("Don't forget to drink water :)");
     } else if (weather.temp < 5) {
-      recommendations.push(
-        "Холодно! Лучше посетить музеи и крытые пространства.",
-      );
-      recommendations.push("Одевайся теплее, если планируешь долго гулять.");
+      recommendations.push("Dress warmly if you plan to walk for a long time.");
     } else if (weather.temp < 15) {
-      recommendations.push("Хорошего дня, не забудь хорошо провести время :)");
+      recommendations.push(
+        "Have a nice day, don't forget to enjoy your time :)",
+      );
     } else if (weather.temp >= 15 && weather.temp <= 25) {
-      recommendations.push("Отличная погода для прогулок на свежем воздухе!");
+      recommendations.push("Great weather for outdoor walks!");
     }
 
-    // Weather condition-based
     if (
-      weather.description.includes("дождь") ||
-      weather.description.includes("rain")
+      weather.description.includes("rain") ||
+      weather.description.includes("дождь")
     ) {
-      recommendations.push("Дождь! Меняем маршрут на крытые места.");
-      recommendations.push("Рекомендуем рынки, музеи и кафе.");
+      recommendations.push(
+        "It's raining! Let's switch the route to indoor places.",
+      );
+      recommendations.push("We recommend markets, museums, and cafes.");
     }
 
     if (weather.windSpeed > 10) {
-      recommendations.push("Сильный ветер. Избегаем открытых пространств.");
+      recommendations.push("Strong wind. Avoid open areas.");
     }
 
     return {
@@ -124,9 +117,7 @@ export class WeatherService {
     };
   }
 
-  // Helper: Generate location hash
   private getLocationHash(lat: number, lng: number): string {
-    // Round to 2 decimals for caching (~1km precision)
     const roundedLat = Math.round(lat * 100) / 100;
     const roundedLng = Math.round(lng * 100) / 100;
     return crypto
@@ -135,7 +126,6 @@ export class WeatherService {
       .digest("hex");
   }
 
-  // Helper: Get cached weather
   private async getCachedWeather(
     locationHash: string,
   ): Promise<WeatherData | null> {
@@ -145,7 +135,6 @@ export class WeatherService {
 
     if (!cached) return null;
 
-    // Check if expired
     if (cached.expiresAt < new Date()) {
       await prisma.weatherCache.delete({ where: { locationHash } });
       return null;
@@ -154,7 +143,6 @@ export class WeatherService {
     return cached.data as unknown as WeatherData;
   }
 
-  // Helper: Cache weather data
   private async cacheWeather(
     locationHash: string,
     data: WeatherData,

@@ -3,10 +3,7 @@ import { AppError } from "../middleware/error.middleware";
 import { UserPreferences } from "../types";
 
 export class UserService {
-  // Get user profile
-  // src/services/user.service.ts
 
-  // Get user profile
   async getProfile(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -24,7 +21,6 @@ export class UserService {
       throw new AppError("User not found", 404);
     }
 
-    // ✅ Если preferences нет - создать дефолтные
     if (!user.preferences) {
       const defaultPreferences = {
         favoriteCategories: [],
@@ -38,7 +34,6 @@ export class UserService {
         fitnessLevel: "medium",
       };
 
-      // Сохранить в БД
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: { preferences: defaultPreferences as any },
@@ -58,7 +53,6 @@ export class UserService {
     return user;
   }
 
-  // Update profile
   async updateProfile(
     userId: string,
     data: { name?: string; avatar?: string },
@@ -77,7 +71,6 @@ export class UserService {
     return user;
   }
 
-  // Update preferences
   async updatePreferences(userId: string, preferences: UserPreferences) {
     const user = await prisma.user.update({
       where: { id: userId },
@@ -91,7 +84,6 @@ export class UserService {
     return user;
   }
 
-  // Get user statistics
   async getUserStats(userId: string) {
     const [visitedCount, routesCount, wishlistCount] = await Promise.all([
       prisma.userPlaceInteraction.count({
@@ -105,7 +97,6 @@ export class UserService {
       }),
     ]);
 
-    // Calculate total travel days (mock for now)
     const routes = await prisma.route.findMany({
       where: { userId },
       select: { createdAt: true },
@@ -123,7 +114,6 @@ export class UserService {
     };
   }
 
-  // Get visit history
   async getVisitHistory(userId: string, limit: number = 20) {
     const history = await prisma.userPlaceInteraction.findMany({
       where: { userId, visited: true },
@@ -151,7 +141,6 @@ export class UserService {
     return history;
   }
 
-  // Mark place as visited
   async markPlaceVisited(userId: string, placeId: string) {
     const interaction = await prisma.userPlaceInteraction.upsert({
       where: {
@@ -172,7 +161,6 @@ export class UserService {
     return interaction;
   }
 
-  // Get wishlist
   async getWishlist(userId: string) {
     const wishlist = await prisma.userPlaceInteraction.findMany({
       where: { userId, wishlist: true },
@@ -199,7 +187,6 @@ export class UserService {
     return wishlist.map((w) => w.place);
   }
 
-  // Add to wishlist
   async addToWishlist(userId: string, placeId: string) {
     const interaction = await prisma.userPlaceInteraction.upsert({
       where: {
@@ -218,7 +205,6 @@ export class UserService {
     return interaction;
   }
 
-  // Remove from wishlist
   async removeFromWishlist(userId: string, placeId: string) {
     await prisma.userPlaceInteraction.update({
       where: {
@@ -232,7 +218,6 @@ export class UserService {
     return { success: true };
   }
 
-  // Like/Unlike place
   async toggleLike(userId: string, placeId: string) {
     const existing = await prisma.userPlaceInteraction.findUnique({
       where: {

@@ -5,7 +5,6 @@ import { UserService } from "../services/user.service";
 const userService = new UserService();
 
 export class UserController {
-  // GET /api/users/profile
   async getProfile(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const profile = await userService.getProfile(req.user!.id);
@@ -19,7 +18,6 @@ export class UserController {
     }
   }
 
-  // PUT /api/users/profile
   async updateProfile(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { name, avatar } = req.body;
@@ -38,7 +36,6 @@ export class UserController {
     }
   }
 
-  // PUT /api/users/preferences
   async updatePreferences(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const preferences = req.body;
@@ -57,7 +54,6 @@ export class UserController {
     }
   }
 
-  // GET /api/users/stats
   async getStats(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const stats = await userService.getUserStats(req.user!.id);
@@ -71,7 +67,6 @@ export class UserController {
     }
   }
 
-  // GET /api/users/history
   async getHistory(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
@@ -86,7 +81,6 @@ export class UserController {
     }
   }
 
-  // POST /api/users/visited
   async markVisited(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { placeId } = req.body;
@@ -101,7 +95,6 @@ export class UserController {
     }
   }
 
-  // GET /api/users/wishlist
   async getWishlist(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const wishlist = await userService.getWishlist(req.user!.id);
@@ -115,7 +108,6 @@ export class UserController {
     }
   }
 
-  // POST /api/users/wishlist
   async addToWishlist(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { placeId } = req.body;
@@ -130,7 +122,6 @@ export class UserController {
     }
   }
 
-  // DELETE /api/users/wishlist/:placeId
   async removeFromWishlist(
     req: AuthRequest,
     res: Response,
@@ -149,7 +140,6 @@ export class UserController {
     }
   }
 
-  // POST /api/users/like/:placeId
   async toggleLike(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { placeId } = req.params;

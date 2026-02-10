@@ -6,13 +6,19 @@ import { prisma } from "../config/database";
 const aiService = new AIService();
 
 export class AIController {
-  // POST /api/ai/chat
+
   async chat(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { message, routeId, context } = req.body;
+      const { message, routeId, context, autoApply = false } = req.body;
       const userId = req.user!.id;
 
-      // Get chat history
+      let currentRoute = null;
+      if (routeId) {
+        currentRoute = await prisma.route.findUnique({
+          where: { id: routeId },
+        });
+      }
+
       const chatHistory = await prisma.chatMessage.findMany({
         where: { userId, routeId: routeId || null },
         orderBy: { createdAt: "desc" },
@@ -25,13 +31,17 @@ export class AIController {
         content: m.message,
       }));
 
-      // Get AI response
-      const response = await aiService.chat(message, {
-        ...context,
-        chatHistory: formattedHistory,
-      });
+      const response = await aiService.chat(
+        message,
+        {
+          ...context,
+          currentRoute,
+          routeId,
+          chatHistory: formattedHistory,
+        },
+        autoApply,
+      );
 
-      // Save messages to database
       await prisma.chatMessage.createMany({
         data: [
           {
@@ -44,7 +54,7 @@ export class AIController {
           {
             userId,
             routeId: routeId || null,
-            message: response,
+            message: response.message,
             role: "assistant",
           },
         ],
@@ -52,16 +62,12 @@ export class AIController {
 
       res.json({
         success: true,
-        data: {
-          message: response,
-        },
+        data: response,
       });
     } catch (error) {
       next(error);
     }
   }
-
-  // POST /api/ai/adapt-route
   async adaptRoute(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { routeId, condition } = req.body;
@@ -78,7 +84,6 @@ export class AIController {
     }
   }
 
-  // GET /api/ai/recommendations
   async getRecommendations(
     req: AuthRequest,
     res: Response,

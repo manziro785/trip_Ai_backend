@@ -7,7 +7,6 @@ import { validate } from "../middleware/validation.middleware";
 const router = Router();
 const placeController = new PlaceController();
 
-// Public routes (with optional auth for user-specific data)
 router.get("/", placeController.getPlaces.bind(placeController));
 router.get("/categories", placeController.getCategories.bind(placeController));
 router.get(

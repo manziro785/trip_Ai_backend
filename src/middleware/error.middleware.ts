@@ -24,13 +24,11 @@ export const errorHandler = (
   let statusCode = 500;
   let message = "Internal server error";
 
-  // App Error
   if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
   }
 
-  // Prisma Errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     statusCode = 400;
 
@@ -49,13 +47,11 @@ export const errorHandler = (
     }
   }
 
-  // Prisma Validation Error
   if (err instanceof Prisma.PrismaClientValidationError) {
     statusCode = 400;
     message = "Invalid data provided";
   }
 
-  // JWT Errors
   if (err.name === "JsonWebTokenError") {
     statusCode = 401;
     message = "Invalid token";
@@ -66,7 +62,6 @@ export const errorHandler = (
     message = "Token expired";
   }
 
-  // Log error in development
   if (env.NODE_ENV === "development") {
     console.error("❌ Error:", err);
   }

@@ -5,50 +5,49 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting seed...");
 
-  // Create categories
   await prisma.category.createMany({
     data: [
       {
-        name: "Еда и кафе",
+        name: "Food and Cafes",
         slug: "food-cafes",
         icon: "🍽️",
         color: "#FF6B6B",
-        description: "Рестораны, кафе, традиционная кухня",
+        description: "Restaurants, cafes, traditional cuisine",
       },
       {
-        name: "История и культура",
+        name: "History and Culture",
         slug: "history-culture",
         icon: "🏛️",
         color: "#9B59B6",
-        description: "Музеи, памятники, исторические места",
+        description: "Museums, monuments, historical places",
       },
       {
-        name: "Природа и активности",
+        name: "Nature and Activities",
         slug: "nature-activities",
         icon: "🏔️",
         color: "#3498DB",
-        description: "Горы, озера, треккинг, природные парки",
+        description: "Mountains, lakes, trekking, nature parks",
       },
       {
-        name: "Шопинг и прогулки",
+        name: "Shopping and Walks",
         slug: "shopping-walks",
         icon: "🛍️",
         color: "#F39C12",
-        description: "Рынки, торговые центры, парки",
+        description: "Markets, shopping centers, parks",
       },
       {
-        name: "Искусство и креатив",
+        name: "Art and Creative",
         slug: "art-creative",
         icon: "🎨",
         color: "#E91E63",
-        description: "Галереи, арт-пространства, творческие места",
+        description: "Galleries, art spaces, creative places",
       },
       {
-        name: "Вечерние развлечения",
+        name: "Nightlife",
         slug: "nightlife",
         icon: "🌃",
         color: "#34495E",
-        description: "Бары, клубы, вечерние мероприятия",
+        description: "Bars, clubs, evening events",
       },
     ],
     skipDuplicates: true,
@@ -56,7 +55,6 @@ async function main() {
 
   console.log("✅ Categories created");
 
-  // Get category IDs
   const foodCategory = await prisma.category.findUnique({
     where: { slug: "food-cafes" },
   });
@@ -73,233 +71,329 @@ async function main() {
     where: { slug: "art-creative" },
   });
 
-  // Create places
   const places = [
-    // Bishkek Food
     {
-      name: "Навat",
+      name: "Navat",
       slug: "navat",
-      categoryId: foodCategory!.id,
+      category: { connect: { id: foodCategory!.id } },
       description:
-        "Традиционный ресторан с национальной кухней. Известен своим бешбармаком и лагманом.",
-      address: "ул. Тоголок Молдо, Бишкек",
+        "Traditional restaurant with national cuisine. Famous for beshbarmak and lagman.",
+      address: "Togolok Moldo St., Bishkek",
       lat: 42.8746,
       lng: 74.5698,
       photos: ["https://example.com/navat.jpg"],
       priceRange: "medium",
       rating: 4.7,
-      openingHours: {
-        monday: "10:00-23:00",
-        tuesday: "10:00-23:00",
-        wednesday: "10:00-23:00",
-        thursday: "10:00-23:00",
-        friday: "10:00-00:00",
-        saturday: "10:00-00:00",
-        sunday: "10:00-23:00",
-      },
-      tags: ["традиционная кухня", "бешбармак", "лагман"],
+      openingHours:
+        "Mon-Thu 10:00-23:00; Fri-Sat 10:00-00:00; Sun 10:00-23:00",
     },
     {
       name: "Coffeedelia",
       slug: "coffeedelia",
-      categoryId: foodCategory!.id,
+      category: { connect: { id: foodCategory!.id } },
       description:
-        "Уютная кофейня с отличным кофе и десертами. Популярна среди местных.",
-      address: "пр. Чуй, Бишкек",
+        "Cozy coffee shop with great coffee and desserts. Popular with locals.",
+      address: "Chuy Ave., Bishkek",
       lat: 42.8765,
       lng: 74.6033,
       photos: ["https://example.com/coffeedelia.jpg"],
       priceRange: "low",
       rating: 4.5,
-      openingHours: {
-        monday: "08:00-22:00",
-        tuesday: "08:00-22:00",
-        wednesday: "08:00-22:00",
-        thursday: "08:00-22:00",
-        friday: "08:00-23:00",
-        saturday: "09:00-23:00",
-        sunday: "09:00-22:00",
-      },
-      tags: ["кофе", "десерты", "wi-fi"],
+      openingHours:
+        "Mon-Thu 08:00-22:00; Fri 08:00-23:00; Sat 09:00-23:00; Sun 09:00-22:00",
     },
 
-    // History & Culture
     {
-      name: "Ала-Тоо площадь",
+      name: "Ala-Too Square",
       slug: "ala-too-square",
-      categoryId: historyCategory!.id,
+      category: { connect: { id: historyCategory!.id } },
       description:
-        "Центральная площадь Бишкека. Место проведения парадов и мероприятий.",
-      address: "пр. Чуй, Бишкек",
+        "Central square of Bishkek. Venue for parades and city events.",
+      address: "Chuy Ave., Bishkek",
       lat: 42.8746,
       lng: 74.6066,
       photos: ["https://example.com/ala-too.jpg"],
       priceRange: "free",
       rating: 4.6,
-      tags: ["площадь", "памятник", "фото"],
     },
     {
-      name: "Государственный исторический музей",
+      name: "State Historical Museum",
       slug: "history-museum",
-      categoryId: historyCategory!.id,
+      category: { connect: { id: historyCategory!.id } },
       description:
-        "Главный исторический музей Кыргызстана с богатой коллекцией.",
-      address: "пл. Ала-Тоо, Бишкек",
+        "The main historical museum of Kyrgyzstan with a rich collection.",
+      address: "Ala-Too Sq., Bishkek",
       lat: 42.8751,
       lng: 74.607,
       photos: ["https://example.com/museum.jpg"],
       priceRange: "low",
       rating: 4.4,
-      openingHours: {
-        monday: "Closed",
-        tuesday: "09:00-17:00",
-        wednesday: "09:00-17:00",
-        thursday: "09:00-17:00",
-        friday: "09:00-17:00",
-        saturday: "09:00-17:00",
-        sunday: "09:00-17:00",
-      },
-      tags: ["музей", "история", "культура"],
+      openingHours: "Mon Closed; Tue-Sun 09:00-17:00",
     },
 
-    // Nature
     {
-      name: "Ала-Арча",
+      name: "Ala-Archa",
       slug: "ala-archa",
-      categoryId: natureCategory!.id,
+      category: { connect: { id: natureCategory!.id } },
       description:
-        "Национальный парк в 40 км от Бишкека. Треккинг, пикники, красивые виды.",
-      address: "Ала-Арчинский район",
+        "National park 40 km from Bishkek. Trekking, picnics, beautiful views.",
+      address: "Ala-Archa District",
       lat: 42.55,
       lng: 74.4833,
       photos: ["https://example.com/ala-archa.jpg"],
       priceRange: "low",
       rating: 4.9,
-      tags: ["природа", "горы", "треккинг", "пикник"],
     },
     {
-      name: "Иссык-Куль",
+      name: "Issyk-Kul",
       slug: "issyk-kul",
-      categoryId: natureCategory!.id,
+      category: { connect: { id: natureCategory!.id } },
       description:
-        "Второе по величине высокогорное озеро в мире. Пляжи, санатории, чистый воздух.",
-      address: "Иссык-Кульская область",
+        "The second-largest alpine lake in the world. Beaches, resorts, clean air.",
+      address: "Issyk-Kul Region",
       lat: 42.4333,
       lng: 77.0833,
       photos: ["https://example.com/issyk-kul.jpg"],
       priceRange: "medium",
       rating: 5.0,
-      tags: ["озеро", "пляж", "отдых", "природа"],
     },
 
-    // Shopping
     {
-      name: "Ошский базар",
+      name: "Osh Bazaar",
       slug: "osh-bazaar",
-      categoryId: shoppingCategory!.id,
+      category: { connect: { id: shoppingCategory!.id } },
       description:
-        "Крупнейший рынок Бишкека. Фрукты, овощи, специи, одежда, сувениры.",
-      address: "ул. Беишеналиевой, Бишкек",
+        "The largest market in Bishkek. Fruits, vegetables, spices, clothing, souvenirs.",
+      address: "Beishenaliev St., Bishkek",
       lat: 42.8691,
       lng: 74.5864,
       photos: ["https://example.com/osh-bazaar.jpg"],
       priceRange: "low",
       rating: 4.3,
-      openingHours: {
-        monday: "06:00-19:00",
-        tuesday: "06:00-19:00",
-        wednesday: "06:00-19:00",
-        thursday: "06:00-19:00",
-        friday: "06:00-19:00",
-        saturday: "06:00-19:00",
-        sunday: "06:00-19:00",
-      },
-      tags: ["рынок", "шопинг", "сувениры", "еда"],
+      openingHours: "Daily 06:00-19:00",
     },
     {
-      name: "Дубовый парк",
+      name: "Oak Park",
       slug: "oak-park",
-      categoryId: shoppingCategory!.id,
-      description: "Центральный парк Бишкека. Прогулки, аттракционы, кафе.",
-      address: "пр. Эркиндик, Бишкек",
+      category: { connect: { id: shoppingCategory!.id } },
+      description: "Central park of Bishkek. Walks, attractions, cafes.",
+      address: "Erkindik Ave., Bishkek",
       lat: 42.8777,
       lng: 74.6122,
       photos: ["https://example.com/oak-park.jpg"],
       priceRange: "free",
       rating: 4.5,
-      tags: ["парк", "прогулка", "отдых"],
     },
 
-    // Art
     {
-      name: "Галерея Эркиндик",
-      slug: "erkindiк-gallery",
-      categoryId: artCategory!.id,
+      name: "Erkindik Gallery",
+      slug: "erkindik-gallery",
+      category: { connect: { id: artCategory!.id } },
       description:
-        "Современная художественная галерея с выставками местных художников.",
-      address: "ул. Абдрахманова, Бишкек",
+        "Modern art gallery with exhibitions by local artists.",
+      address: "Abdrakhmanov St., Bishkek",
       lat: 42.878,
       lng: 74.595,
       photos: ["https://example.com/gallery.jpg"],
       priceRange: "free",
       rating: 4.2,
-      openingHours: {
-        monday: "Closed",
-        tuesday: "11:00-19:00",
-        wednesday: "11:00-19:00",
-        thursday: "11:00-19:00",
-        friday: "11:00-19:00",
-        saturday: "12:00-18:00",
-        sunday: "12:00-18:00",
-      },
-      tags: ["галерея", "искусство", "выставки"],
+      openingHours: "11:00-19:00",
+    },
+    {
+      name: "Burana",
+      slug: "burana-tower",
+      category: { connect: { id: historyCategory!.id } },
+      description:
+        "Historic minaret from the 10th-11th centuries near Tokmok. Open-air museum.",
+      address: "Chuy Region, 80 km from Bishkek",
+      lat: 42.7439,
+      lng: 75.2439,
+      photos: ["https://example.com/burana.jpg"],
+      priceRange: "low",
+      rating: 4.6,
+      openingHours: "09:00-18:00",
+    },
+    {
+      name: "Suusamyr",
+      slug: "suusamyr-valley",
+      category: { connect: { id: natureCategory!.id } },
+      description:
+        "High-mountain valley with panoramic views and fresh air.",
+      address: "Suusamyr Valley",
+      lat: 42.14,
+      lng: 73.9,
+      photos: ["https://example.com/suusamyr.jpg"],
+      priceRange: "free",
+      rating: 4.8,
+    },
+    {
+      name: "Fairy Tale Canyon",
+      slug: "fairy-tale-canyon",
+      category: { connect: { id: natureCategory!.id } },
+      description:
+        "Colorful sandstone canyon on the south shore of Issyk-Kul.",
+      address: "Issyk-Kul Region",
+      lat: 42.1769,
+      lng: 77.4092,
+      photos: ["https://example.com/fairy-tale.jpg"],
+      priceRange: "low",
+      rating: 4.7,
+    },
+    {
+      name: "Grigoryevskoe Gorge",
+      slug: "grigoryevskoe-gorge",
+      category: { connect: { id: natureCategory!.id } },
+      description:
+        "Picturesque gorge with conifers and mountain streams near Issyk-Kul.",
+      address: "Issyk-Kul Region",
+      lat: 42.6769,
+      lng: 77.2506,
+      photos: ["https://example.com/grigoryevskoe.jpg"],
+      priceRange: "free",
+      rating: 4.6,
+    },
+    {
+      name: "Karakol",
+      slug: "karakol-city",
+      category: { connect: { id: historyCategory!.id } },
+      description:
+        "Cultural center of Issyk-Kul. Historic architecture and museums.",
+      address: "Karakol City",
+      lat: 42.4907,
+      lng: 78.3936,
+      photos: ["https://example.com/karakol.jpg"],
+      priceRange: "medium",
+      rating: 4.5,
+    },
+    {
+      name: "Sary-Chelek",
+      slug: "sary-chelek",
+      category: { connect: { id: natureCategory!.id } },
+      description: "Protected lake surrounded by mountains and forests.",
+      address: "Jalal-Abad Region",
+      lat: 41.86,
+      lng: 72.02,
+      photos: ["https://example.com/sary-chelek.jpg"],
+      priceRange: "low",
+      rating: 4.9,
+    },
+    {
+      name: "Osh (Sulaiman-Too)",
+      slug: "sulayman-too",
+      category: { connect: { id: historyCategory!.id } },
+      description:
+        "Sacred mountain in Osh, UNESCO site and popular viewpoint.",
+      address: "Osh City",
+      lat: 40.5283,
+      lng: 72.7985,
+      photos: ["https://example.com/sulayman-too.jpg"],
+      priceRange: "free",
+      rating: 4.7,
+    },
+    {
+      name: "TSUM Aichurek",
+      slug: "tsum-aichurek",
+      category: { connect: { id: shoppingCategory!.id } },
+      description:
+        "Large shopping center in the center of Bishkek.",
+      address: "Chuy Ave., Bishkek",
+      lat: 42.8756,
+      lng: 74.6039,
+      photos: ["https://example.com/tsum.jpg"],
+      priceRange: "medium",
+      rating: 4.2,
+      openingHours: "10:00-22:00",
+    },
+    {
+      name: "Botanical Garden",
+      slug: "botanical-garden",
+      category: { connect: { id: natureCategory!.id } },
+      description:
+        "Quiet place for walks and relaxation in Bishkek.",
+      address: "Akhunbaev St., Bishkek",
+      lat: 42.8536,
+      lng: 74.6113,
+      photos: ["https://example.com/botanical-garden.jpg"],
+      priceRange: "low",
+      rating: 4.3,
+      openingHours: "09:00-20:00",
+    },
+    {
+      name: "Opera and Ballet Theatre",
+      slug: "opera-and-ballet-theatre",
+      category: { connect: { id: artCategory!.id } },
+      description:
+        "National opera and ballet theatre with classic performances.",
+      address: "Abdrakhmanov St., Bishkek",
+      lat: 42.8752,
+      lng: 74.6138,
+      photos: ["https://example.com/opera.jpg"],
+      priceRange: "medium",
+      rating: 4.6,
+      openingHours: "11:00-19:00",
+    },
+    {
+      name: "Panfilov Park",
+      slug: "panfilov-park",
+      category: { connect: { id: shoppingCategory!.id } },
+      description:
+        "Popular city park with rides and alleys.",
+      address: "Frunze St., Bishkek",
+      lat: 42.874,
+      lng: 74.5949,
+      photos: ["https://example.com/panfilov-park.jpg"],
+      priceRange: "low",
+      rating: 4.4,
     },
   ];
 
   for (const place of places) {
-    await prisma.place.create({ data: place });
+    await prisma.place.upsert({
+      where: { slug: place.slug },
+      update: { ...place },
+      create: place,
+    });
   }
 
   console.log("✅ Places created");
 
-  // Create insights
   const insights = [
     {
-      title: "Торгуйся на Ошском базаре",
-      description:
-        "Цены на рынке завышены для туристов. Торгуйся и сбивай 30-40%. Это нормально и ожидается!",
+      title: "Bargain at Osh Bazaar",
+      content:
+        "Prices are higher for tourists. Bargain and ask for 30-40% off. It's normal and expected.",
       category: "tip",
       placeId: (await prisma.place.findUnique({
         where: { slug: "osh-bazaar" },
       }))!.id,
     },
     {
-      title: "Бесплатный вход в Ала-Арчу до 8 утра",
-      description:
-        "Если приедешь в национальный парк до 8 утра, вход будет бесплатным. Плюс меньше людей и прохладнее.",
+      title: "Free entry to Ala-Archa before 8 AM",
+      content:
+        "If you arrive before 8 AM, entry is free. Fewer people and cooler weather too.",
       category: "secret",
       placeId: (await prisma.place.findUnique({
         where: { slug: "ala-archa" },
       }))!.id,
     },
     {
-      title: "В Навате есть секретное меню",
-      description:
-        'Спроси у официанта про "домашние блюда" - это секретное меню с самыми вкусными и аутентичными блюдами.',
+      title: "Navat has a secret menu",
+      content:
+        "Ask the waiter about the 'home dishes' - it's a secret menu with the most authentic dishes.",
       category: "secret",
       placeId: (await prisma.place.findUnique({ where: { slug: "navat" } }))!
         .id,
     },
     {
-      title: "Не бери такси у вокзала",
-      description:
-        "Таксисты у вокзала завышают цены в 2-3 раза. Отойди на 200-300м и лови там, или используй Яндекс.Такси.",
+      title: "Don't take taxis at the station",
+      content:
+        "Station taxi drivers overcharge by 2-3x. Walk 200-300m and catch one there, or use a ride app.",
       category: "important",
     },
     {
-      title: "Лучшее время для Иссык-Куля",
-      description:
-        "Июль-август - пик сезона и много людей. Приезжай в июне или сентябре: теплая вода, меньше туристов, дешевле жилье.",
+      title: "Best time for Issyk-Kul",
+      content:
+        "July-August is peak season and crowded. Visit in June or September: warm water, fewer tourists, cheaper lodging.",
       category: "tip",
       placeId: (await prisma.place.findUnique({
         where: { slug: "issyk-kul" },

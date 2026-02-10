@@ -4,7 +4,6 @@ import { InsightService } from "../services/insight.service";
 const insightService = new InsightService();
 
 export class InsightController {
-  // GET /api/insights
   async getInsights(req: Request, res: Response, next: NextFunction) {
     try {
       const { category, placeId, page, limit } = req.query;
@@ -26,7 +25,6 @@ export class InsightController {
     }
   }
 
-  // GET /api/insights/:id
   async getInsightById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -42,7 +40,6 @@ export class InsightController {
     }
   }
 
-  // POST /api/insights/:id/helpful
   async markHelpful(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -59,7 +56,6 @@ export class InsightController {
     }
   }
 
-  // GET /api/insights/by-place/:placeId
   async getInsightsByPlace(req: Request, res: Response, next: NextFunction) {
     try {
       const { placeId } = req.params;
@@ -77,7 +73,6 @@ export class InsightController {
     }
   }
 
-  // GET /api/insights/random
   async getRandomInsight(_req: Request, res: Response, next: NextFunction) {
     try {
       const insight = await insightService.getRandomInsight();
@@ -91,7 +86,6 @@ export class InsightController {
     }
   }
 
-  // GET /api/insights/trending
   async getTrendingInsights(req: Request, res: Response, next: NextFunction) {
     try {
       const limit = parseInt(req.query.limit as string) || 10;

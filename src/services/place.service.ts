@@ -2,7 +2,6 @@ import { prisma } from "../config/database";
 import { AppError } from "../middleware/error.middleware";
 
 export class PlaceService {
-  // Get all places with filters
   async getPlaces(filters: {
     categoryId?: string;
     search?: string;
@@ -56,7 +55,6 @@ export class PlaceService {
     };
   }
 
-  // Get place by ID
   async getPlaceById(placeId: string, userId?: string) {
     const place = await prisma.place.findUnique({
       where: { id: placeId },
@@ -73,7 +71,6 @@ export class PlaceService {
       throw new AppError("Place not found", 404);
     }
 
-    // Get user interaction if userId provided
     let userInteraction = null;
     if (userId) {
       userInteraction = await prisma.userPlaceInteraction.findUnique({
@@ -95,10 +92,7 @@ export class PlaceService {
     };
   }
 
-  // Get nearby places
   async getNearbyPlaces(lat: number, lng: number, radius: number = 5) {
-    // Simple distance calculation (for more accuracy use PostGIS)
-    // This is a rough approximation: 1 degree ≈ 111km
     const latDelta = radius / 111;
     const lngDelta = radius / (111 * Math.cos((lat * Math.PI) / 180));
 
@@ -119,7 +113,6 @@ export class PlaceService {
       take: 50,
     });
 
-    // Calculate actual distance and sort
     const placesWithDistance = places.map((place) => {
       const distance = this.calculateDistance(lat, lng, place.lat, place.lng);
       return { ...place, distance };
@@ -130,21 +123,19 @@ export class PlaceService {
       .sort((a, b) => a.distance - b.distance);
   }
 
-  // Get all categories
   async getCategories() {
     return await prisma.category.findMany({
       orderBy: { name: "asc" },
     });
   }
 
-  // Calculate distance between two points (Haversine formula)
   private calculateDistance(
     lat1: number,
     lon1: number,
     lat2: number,
     lon2: number,
   ): number {
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lon2 - lon1) * Math.PI) / 180;
 

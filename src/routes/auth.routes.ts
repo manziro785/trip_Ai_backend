@@ -7,7 +7,6 @@ import { authenticate } from "../middleware/auth.middleware";
 const router = Router();
 const authController = new AuthController();
 
-// Public routes
 router.post(
   "/register",
   registerValidator,
@@ -22,7 +21,6 @@ router.post(
 );
 router.post("/google", authController.googleAuth.bind(authController));
 
-// Protected routes
 router.get(
   "/me",
   authenticate,
